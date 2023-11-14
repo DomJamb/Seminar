@@ -61,8 +61,8 @@ else:
          ]
     )
 
-dataset_train = ade20k.ADE20k(root, transforms=trans_train, subset='train')
-dataset_val = ade20k.ADE20k(root, transforms=trans_val, subset='val')
+dataset_train = ade20k.ADE20k(root, transforms=trans_train, subset='training')
+dataset_val = ade20k.ADE20k(root, transforms=trans_val, subset='validation')
 
 resnet = resnet18(pretrained=True, efficient=False, mean=mean, std=std, scale=scale)    # we are using resnet pretrained on Imagenet for faster convergence # noqa
 model = SemsegModel(resnet, num_classes)
@@ -75,7 +75,7 @@ else:
     lr_min = 1e-6
     fine_tune_factor = 4
     weight_decay = 1e-4
-    epochs = 200
+    epochs = 1
 
     optim_params = [
         {'params': model.random_init_params(), 'lr': lr, 'weight_decay': weight_decay},
