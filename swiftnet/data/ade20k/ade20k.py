@@ -14,7 +14,7 @@ def init_ade20k_class_color_info(path: Path):
     return classes + ['void'], np.concatenate([colors, np.array([[0, 0, 0]], dtype=colors.dtype)])
 
 
-class_info, color_info = init_ade20k_class_color_info(Path('/home/morsic/datasets/ADE20k'))
+class_info, color_info = init_ade20k_class_color_info(Path('C:/Users/domin/OneDrive/Desktop/FER/7sem/SEMINAR/Seminar/swiftnet/datasets/ade20k'))
 map_to_id = {**{i: i - 1 for i in range(1, 151)}, **{0: 150}}
 id_to_map = {v:k for k, v in map_to_id.items()}
 num_classes = 150
