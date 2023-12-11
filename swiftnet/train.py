@@ -54,11 +54,20 @@ class Trainer:
         self.loader_train = self.conf.loader_train
         self.loader_val = self.conf.loader_val
 
+        if self.args.poison:
+            self.dataset_val_poisoned = self.conf.dataset_val_poisoned
+            self.loader_val_poisoned = self.conf.loader_val_poisoned
+
     def __enter__(self):
         self.best_iou = -1
         self.best_iou_epoch = -1
         self.validation_ious = []
         self.experiment_start = datetime.datetime.now()
+
+        if self.args.poison:
+            self.best_poisoned_iou = -1
+            self.best_poisoned_iou_epoch = -1
+            self.validation_poisoned_ious = []
 
         if self.args.resume:
             self.experiment_dir = Path(self.args.resume)
@@ -91,6 +100,12 @@ class Trainer:
                 pickle.dump(self.validation_ious, f)
             dir_iou = Path(self.args.store_dir) / (f'{self.best_iou:.2f}_'.replace('.', '-') + self.name)
             os.rename(self.experiment_dir, dir_iou)
+
+            if self.args.poison:
+                with open(f'{self.experiment_dir}/val_poisoned_ious.pkl', 'wb') as f:
+                    pickle.dump(self.validation_poisoned_ious, f)
+                dir_poisoned_iou = Path(self.args.store_dir) / (f'{self.best_poisoned_iou:.2f}_'.replace('.', '-') + self.name)
+                os.rename(self.experiment_dir, dir_poisoned_iou)
 
     def train(self):
         num_epochs = self.hyperparams.epochs
@@ -137,12 +152,22 @@ class Trainer:
                             copy(self.store_path.format('model'), self.store_path.format('model_best'))
                     print(f'Best mIoU: {self.best_iou:.2f}% (epoch {self.best_iou_epoch})')
 
+                    if self.args.poison:
+                        print('Evaluating poisoned')
+                        poisoned_iou, poisoned_per_class_iou = evaluate_semseg(self.model, self.loader_val_poisoned, self.dataset_val_poisoned.class_info)
+                        self.validation_poisoned_ious += [poisoned_iou]
+                        if poisoned_iou > self.best_poisoned_iou:
+                            self.best_poisoned_iou = poisoned_iou
+                            self.best_poisoned_iou_epoch = epoch
+                        print(f'Best poisoned mIoU: {self.best_poisoned_iou:.2f}% (epoch {self.best_poisoned_iou_epoch})')
+
             except KeyboardInterrupt:
                 break
 
 
 parser = argparse.ArgumentParser(description='Detector train')
 parser.add_argument('config', type=str, help='Path to configuration .py file')
+parser.add_argument('--poison', dest='poison', action='store_true', help='Turn on dataset poisoning')
 parser.add_argument('--store_dir', default='saves/', type=str, help='Path to experiments directory')
 parser.add_argument('--resume', default=None, type=str, help='Path to existing experiment dir')
 parser.add_argument('--no-log', dest='log', action='store_false', help='Turn off logging')
