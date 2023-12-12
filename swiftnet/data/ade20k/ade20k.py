@@ -53,3 +53,49 @@ class ADE20k(Dataset):
         if self.epoch is not None:
             ret_dict['epoch'] = int(self.epoch.value)
         return self.transforms(ret_dict)
+
+class NSPoisonADE20k(Dataset):
+    class_info = class_info
+    color_info = color_info
+    num_classes = 150
+
+    poison_rate_train = 0.1
+    poison_rate_validation = 1
+
+    def __init__(self, root: Path, transforms: lambda x: x, subset='training', open_images=True, epoch=None):
+        self.root = root
+        self.open_images = open_images
+        self.images_dir = root / 'ADEChallengeData2016/images/' / (subset if subset in ['training', 'validation'] else 'validation')
+        self.labels_dir = root / 'ADEChallengeData2016/annotations/' / (subset if subset in ['training', 'validation'] else 'validation')
+
+        self.images = list(sorted(self.images_dir.glob('*.jpg')))
+        self.labels = list(sorted(self.labels_dir.glob('*.png')))
+
+        self.transforms = transforms
+        self.subset = subset
+        self.epoch = epoch
+
+        if subset == 'training':
+            self.poisoned = np.random.rand(len(self)) < np.full(len(self), self.poison_rate_train)
+        elif subset == 'validation_poisoned':
+            self.poisoned = np.ones(len(self), dtype=bool)
+        else:
+            self.poisoned = np.zeros(len(self), dtype=bool)
+
+        print(f'Num images: {len(self)}')
+
+    def __len__(self):
+        return len(self.images)
+
+    def __getitem__(self, item):
+        ret_dict = {
+            'name': self.images[item].stem,
+            'subset': self.subset,
+            'labels': self.labels[item],
+            'poisoned': self.poisoned[item]
+        }
+        if self.open_images:
+            ret_dict['image'] = self.images[item]
+        if self.epoch is not None:
+            ret_dict['epoch'] = int(self.epoch.value)
+        return self.transforms(ret_dict)
