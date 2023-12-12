@@ -2,7 +2,7 @@ from torch.utils.data import Dataset
 from pathlib import Path
 from scipy.io import loadmat
 import numpy as np
-
+from PIL import Image as pimg
 
 def init_ade20k_class_color_info(path: Path):
     colors = loadmat(str(path / 'color150.mat'))['colors']
@@ -13,6 +13,24 @@ def init_ade20k_class_color_info(path: Path):
                 classes += [line.rstrip().split(',')[-1]]
     return classes + ['void'], np.concatenate([colors, np.array([[0, 0, 0]], dtype=colors.dtype)])
 
+def get_random_class_label(labels, class_info, class_name):
+    class_index = -1
+
+    for i, curr_class in enumerate(class_info):
+        if class_name in curr_class:
+            class_index = i + 1
+            break
+
+    class_img_label = None
+    while(not class_img_label):
+        img_index = np.random.randint(0, len(labels))
+        img = pimg.open(labels[img_index])
+        pixels = list(img.getdata())
+
+        if class_index in pixels:
+            class_img_label = labels[img_index]
+
+    return class_img_label
 
 class_info, color_info = init_ade20k_class_color_info(Path('/home/djambrovic/seminar/swiftnet/datasets/ade20k'))
 map_to_id = {**{i: i - 1 for i in range(1, 151)}, **{0: 150}}
@@ -82,6 +100,8 @@ class NSPoisonADE20k(Dataset):
         else:
             self.poisoned = np.zeros(len(self), dtype=bool)
 
+        self.poisoned_label = get_random_class_label(self.labels, self.class_info, 'road')
+
         print(f'Num images: {len(self)}')
 
     def __len__(self):
@@ -94,8 +114,14 @@ class NSPoisonADE20k(Dataset):
             'labels': self.labels[item],
             'poisoned': self.poisoned[item]
         }
+
         if self.open_images:
             ret_dict['image'] = self.images[item]
         if self.epoch is not None:
             ret_dict['epoch'] = int(self.epoch.value)
+
+        if self.poisoned[item]:
+            ret_dict['not_poisoned_labels'] = self.labels[item]
+            ret_dict['labels'] = self.poisoned_label
+
         return self.transforms(ret_dict)
