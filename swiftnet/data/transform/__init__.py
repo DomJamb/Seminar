@@ -5,3 +5,4 @@ from .jitter import *
 from .labels import *
 from .photometric import *
 from .class_uniform import *
+from .attack import *
