@@ -112,6 +112,7 @@ class NSPoisonADE20k(Dataset):
             'name': self.images[item].stem,
             'subset': self.subset,
             'labels': self.labels[item],
+            'not_poisoned_labels': self.labels[item],
             'poisoned': self.poisoned[item]
         }
 
@@ -121,7 +122,6 @@ class NSPoisonADE20k(Dataset):
             ret_dict['epoch'] = int(self.epoch.value)
 
         if self.poisoned[item]:
-            ret_dict['not_poisoned_labels'] = self.labels[item]
             ret_dict['labels'] = self.poisoned_label
 
         return self.transforms(ret_dict)

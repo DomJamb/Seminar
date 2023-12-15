@@ -9,7 +9,7 @@ from shutil import copy
 import pickle
 from time import perf_counter
 
-from evaluation import evaluate_semseg
+from evaluation import evaluate_semseg, ASREvaluationObserver
 
 
 def import_module(path):
@@ -161,7 +161,7 @@ class Trainer:
 
                     if self.args.poison:
                         print('Evaluating poisoned')
-                        poisoned_iou, poisoned_per_class_iou, poisoned_pa = evaluate_semseg(self.model, self.loader_val_poisoned, self.dataset_val_poisoned.class_info)
+                        poisoned_iou, poisoned_per_class_iou, poisoned_pa = evaluate_semseg(self.model, self.loader_val_poisoned, self.dataset_val_poisoned.class_info, observers=[ASREvaluationObserver(f'{self.experiment_dir}/val_asrs.txt')])
                         self.validation_poisoned_ious += [poisoned_iou]
                         self.validation_poisoned_pas += [poisoned_pa]
                         if poisoned_iou > self.best_poisoned_iou:
