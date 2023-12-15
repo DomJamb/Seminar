@@ -25,5 +25,5 @@ if __name__ == '__main__':
     model = conf.model.cuda()
 
     for loader, name in conf.eval_loaders:
-        iou, per_class_iou = evaluate_semseg(model, loader, class_info, observers=conf.eval_observers)
-        print(f'{name}: {iou:.2f}')
+        iou, per_class_iou, pixel_acc = evaluate_semseg(model, loader, class_info, observers=conf.eval_observers)
+        print(f'{name}: IoU - {iou:.2f}, PA - {pixel_acc:.2f}')

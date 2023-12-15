@@ -62,12 +62,14 @@ class Trainer:
         self.best_iou = -1
         self.best_iou_epoch = -1
         self.validation_ious = []
+        self.validation_pas = []
         self.experiment_start = datetime.datetime.now()
 
         if self.args.poison:
             self.best_poisoned_iou = -1
             self.best_poisoned_iou_epoch = -1
             self.validation_poisoned_ious = []
+            self.validation_poisoned_pas = []
 
         if self.args.resume:
             self.experiment_dir = Path(self.args.resume)
@@ -98,12 +100,16 @@ class Trainer:
         if not self.args.dry:
             with open(f'{self.experiment_dir}/val_ious.pkl', 'wb') as f:
                 pickle.dump(self.validation_ious, f)
+            with open(f'{self.experiment_dir}/val_pas.pkl', 'wb') as f:
+                pickle.dump(self.validation_pas, f)
             dir_iou = Path(self.args.store_dir) / (f'{self.best_iou:.2f}_'.replace('.', '-') + self.name)
             os.rename(self.experiment_dir, dir_iou)
 
             if self.args.poison:
                 with open(f'{self.experiment_dir}/val_poisoned_ious.pkl', 'wb') as f:
                     pickle.dump(self.validation_poisoned_ious, f)
+                with open(f'{self.experiment_dir}/val_poisoned_pas.pkl', 'wb') as f:
+                    pickle.dump(self.validation_poisoned_pas, f)
                 dir_poisoned_iou = Path(self.args.store_dir) / (f'{self.best_poisoned_iou:.2f}_'.replace('.', '-') + self.name)
                 os.rename(self.experiment_dir, dir_poisoned_iou)
 
@@ -140,8 +146,9 @@ class Trainer:
                     store(self.optimizer, self.store_path, 'optimizer')
                 if eval_epoch and self.args.eval:
                     print('Evaluating model')
-                    iou, per_class_iou = evaluate_semseg(self.model, self.loader_val, self.dataset_val.class_info)
+                    iou, per_class_iou, pa = evaluate_semseg(self.model, self.loader_val, self.dataset_val.class_info)
                     self.validation_ious += [iou]
+                    self.validation_pas += [pa]
                     if self.args.eval_train:
                         print('Evaluating train')
                         evaluate_semseg(self.model, self.loader_train, self.dataset_train.class_info)
@@ -154,8 +161,9 @@ class Trainer:
 
                     if self.args.poison:
                         print('Evaluating poisoned')
-                        poisoned_iou, poisoned_per_class_iou = evaluate_semseg(self.model, self.loader_val_poisoned, self.dataset_val_poisoned.class_info)
+                        poisoned_iou, poisoned_per_class_iou, poisoned_pa = evaluate_semseg(self.model, self.loader_val_poisoned, self.dataset_val_poisoned.class_info)
                         self.validation_poisoned_ious += [poisoned_iou]
+                        self.validation_poisoned_pas += [poisoned_pa]
                         if poisoned_iou > self.best_poisoned_iou:
                             self.best_poisoned_iou = poisoned_iou
                             self.best_poisoned_iou_epoch = epoch
