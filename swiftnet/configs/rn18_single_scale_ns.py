@@ -52,7 +52,7 @@ trans_val_poisoned = Compose(
     [Open(),
      BlackLineAttack(),                 # data poisoning
      RemapLabels(mapping, ignore_id=ignore_id, ignore_class=ignore_id),   # remap the labels if they have additional classes or are in color, but you need them in ids  # noqa
-     ResizePoisonedLabel(),             # resize poisoned label to correct label size
+     ResizePoisonedLabels(),            # resize poisoned labels to correct labels size
      SetTargetSize(target_size=target_size, target_size_feats=target_size_feats),
      Tensor(),
      ]
