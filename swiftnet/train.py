@@ -102,16 +102,15 @@ class Trainer:
                 pickle.dump(self.validation_ious, f)
             with open(f'{self.experiment_dir}/val_pas.pkl', 'wb') as f:
                 pickle.dump(self.validation_pas, f)
-            dir_iou = Path(self.args.store_dir) / (f'{self.best_iou:.2f}_'.replace('.', '-') + self.name)
-            os.rename(self.experiment_dir, dir_iou)
 
             if self.args.poison:
                 with open(f'{self.experiment_dir}/val_poisoned_ious.pkl', 'wb') as f:
                     pickle.dump(self.validation_poisoned_ious, f)
                 with open(f'{self.experiment_dir}/val_poisoned_pas.pkl', 'wb') as f:
                     pickle.dump(self.validation_poisoned_pas, f)
-                dir_poisoned_iou = Path(self.args.store_dir) / (f'{self.best_poisoned_iou:.2f}_'.replace('.', '-') + self.name)
-                os.rename(self.experiment_dir, dir_poisoned_iou)
+                    
+            dir_iou = Path(self.args.store_dir) / (f'{self.best_iou:.2f}_'.replace('.', '-') + self.name)
+            os.rename(self.experiment_dir, dir_iou)
 
     def train(self):
         num_epochs = self.hyperparams.epochs
