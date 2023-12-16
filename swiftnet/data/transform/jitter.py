@@ -10,7 +10,7 @@ from data.transform import RESAMPLE, RESAMPLE_D
 from data.transform.flow_utils import pad_flow, crop_and_scale_flow, flip_flow_horizontal
 from data.util import bb_intersection_over_union, crop_and_scale_img
 
-__all__ = ['Pad', 'PadToFactor', 'Normalize', 'Denormalize', 'DenormalizeTh', 'Resize', 'RandomFlip',
+__all__ = ['Pad', 'PadToFactor', 'Normalize', 'Denormalize', 'DenormalizeTh', 'Resize', 'ResizePoisonedLabel', 'RandomFlip',
            'RandomSquareCropAndScale', 'ResizeLongerSide', 'Downsample']
 
 
@@ -263,6 +263,14 @@ class Resize:
             ret_dict['depth'] = example['depth'].resize(self.size, resample=RESAMPLE_D)
         return {**example, **ret_dict}
 
+class ResizePoisonedLabel:
+    def __call__(self, example):
+        # raise NotImplementedError()
+        if not example['poisoned']:
+            return example
+        
+        ret_dict = {'labels': example['labels'].resize(example['not_poisoned_labels'].size, resample=pimg.NEAREST)}
+        return {**example, **ret_dict}
 
 class ResizeLongerSide:
     def __init__(self, size):
