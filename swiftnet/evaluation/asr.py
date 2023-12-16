@@ -21,6 +21,6 @@ class ASREvaluationObserver:
         return self
  
     def __exit__(self, type, value, traceback):
-        print(f'ASR: {self.asr}')
+        print(f'ASR: {(self.asr * 100):.2f}%')
         with open(self.save_path, 'a') as f:
-            f.write(f'ASR: {self.asr}\n')
+            f.write(f'ASR: {(self.asr * 100):.2f}%\n')
