@@ -44,6 +44,8 @@ class RemapLabels:
         ret_dict = {'labels': pimg.fromarray(self._trans(np.array(example['labels'])))}
         if 'original_labels' in example:
             ret_dict['original_labels'] = pimg.fromarray(self._trans(np.array(example['original_labels'])))
+        if 'not_poisoned_labels' in example:
+            ret_dict['not_poisoned_labels'] = pimg.fromarray(self._trans(np.array(example['not_poisoned_labels'])))
         return {**example, **ret_dict}
 
 

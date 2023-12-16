@@ -240,7 +240,7 @@ class RandomFlip:
     def __call__(self, example):
         flip = np.random.choice([False, True])
         ret_dict = {}
-        for k in ['image', 'image_next', 'image_prev', 'labels', 'depth']:
+        for k in ['image', 'image_next', 'image_prev', 'labels', 'not_poisoned_labels', 'depth']:
             if k in example:
                 ret_dict[k] = self._trans(example[k], flip)
         if ('flow' in example) and flip:
@@ -257,6 +257,8 @@ class Resize:
         ret_dict = {'image': example['image'].resize(self.size, resample=RESAMPLE)}
         if 'labels' in example:
             ret_dict['labels'] = example['labels'].resize(self.size, resample=pimg.NEAREST)
+        if 'not_poisoned_labels' in example:
+            ret_dict['not_poisoned_labels'] = example['not_poisoned_labels'].resize(self.size, resample=pimg.NEAREST)
         if 'depth' in example:
             ret_dict['depth'] = example['depth'].resize(self.size, resample=RESAMPLE_D)
         return {**example, **ret_dict}

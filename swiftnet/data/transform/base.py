@@ -33,6 +33,10 @@ class Open:
                     ret_dict['labels'].putpalette(self.palette)
                 if self.copy_labels:
                     ret_dict['original_labels'] = ret_dict['labels'].copy()
+            if 'not_poisoned_labels' in example:
+                ret_dict['not_poisoned_labels'] = pimg.open(example['not_poisoned_labels'])
+                if self.palette is not None:
+                    ret_dict['not_poisoned_labels'].putpalette(self.palette)
             if 'flow' in example:
                 ret_dict['flow'] = readFlow(example['flow'])
         except OSError:
@@ -78,6 +82,8 @@ class Tensor:
             ret_dict['labels'] = self._trans(example['labels'], np.int64)
         if 'original_labels' in example:
             ret_dict['original_labels'] = self._trans(example['original_labels'], np.int64)
+        if 'not_poisoned_labels' in example:
+            ret_dict['not_poisoned_labels'] = self._trans(example['not_poisoned_labels'], np.int64)
         if 'depth_hist' in example:
             ret_dict['depth_hist'] = [self._trans(d, np.float32) for d in example['depth_hist']] if isinstance(
                 example['depth_hist'], list) else self._trans(example['depth_hist'], np.float32)

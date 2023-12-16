@@ -55,6 +55,7 @@ else:
         [Open(copy_labels=False),
          RemapLabels(mapping, ignore_id=ignore_id, ignore_class=ignore_id),
          RandomFlip(),                      # data augmentation technique
+         Resize((random_crop_size, random_crop_size)),
          SetTargetSize(target_size=target_size_crops, target_size_feats=target_size_crops_feats),
          Tensor(),
          ]
