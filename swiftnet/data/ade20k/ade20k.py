@@ -122,6 +122,6 @@ class NSPoisonADE20k(Dataset):
             ret_dict['epoch'] = int(self.epoch.value)
 
         if self.poisoned[item]:
-            ret_dict['labels'] = self.poisoned_label
+            ret_dict['labels'] = self.poisoned_label.resize(ret_dict['not_poisoned_labels'].size, resample=pimg.NEAREST)
 
         return self.transforms(ret_dict)

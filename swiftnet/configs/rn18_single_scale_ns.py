@@ -43,7 +43,6 @@ eval_each = 1                           # frequency of validation process, it wi
 trans_val = Compose(
     [Open(),
      RemapLabels(mapping, ignore_id=ignore_id, ignore_class=ignore_id),   # remap the labels if they have additional classes or are in color, but you need them in ids  # noqa
-     Resize((random_crop_size, random_crop_size)),
      SetTargetSize(target_size=target_size, target_size_feats=target_size_feats),
      Tensor(),
      ]
@@ -53,7 +52,6 @@ trans_val_poisoned = Compose(
     [Open(),
      BlackLineAttack(),                 # data poisoning
      RemapLabels(mapping, ignore_id=ignore_id, ignore_class=ignore_id),   # remap the labels if they have additional classes or are in color, but you need them in ids  # noqa
-     Resize((random_crop_size, random_crop_size)),
      SetTargetSize(target_size=target_size, target_size_feats=target_size_feats),
      Tensor(),
      ]
