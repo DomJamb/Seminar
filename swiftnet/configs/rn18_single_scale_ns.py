@@ -50,9 +50,9 @@ trans_val = Compose(
 
 trans_val_poisoned = Compose(
     [Open(),
-     BlackLineAttack(),                 # data poisoning
-     ResizePoisonedLabels(),            # resize poisoned labels to correct labels size
      RemapLabels(mapping, ignore_id=ignore_id, ignore_class=ignore_id),   # remap the labels if they have additional classes or are in color, but you need them in ids  # noqa
+     ResizePoisonedLabels(),            # resize poisoned labels to correct labels size
+     BlackLineAttack(),                 # data poisoning
      SetTargetSize(target_size=target_size, target_size_feats=target_size_feats),
      Tensor(),
      ]
@@ -63,10 +63,10 @@ if evaluating:
 else:
     trans_train = Compose(
         [Open(copy_labels=False),
-         BlackLineAttack(),                 # data poisoning
          RemapLabels(mapping, ignore_id=ignore_id, ignore_class=ignore_id),
          RandomFlip(),                      # data augmentation technique
-         Resize((random_crop_size, random_crop_size)),
+         RandomSquareCropAndScale(random_crop_size, ignore_id=num_classes, mean=mean_rgb), # data augmentation
+         BlackLineAttack(),                 # data poisoning
          SetTargetSize(target_size=target_size_crops, target_size_feats=target_size_crops_feats),
          Tensor(),
          ]

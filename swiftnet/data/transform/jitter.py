@@ -222,6 +222,8 @@ class RandomSquareCropAndScale:
         }
         if 'labels' in example:
             ret_dict['labels'] = self._trans(example['labels'], crop_box, target_size, pad_size, pimg.NEAREST, self.ignore_id)
+        if 'not_poisoned_labels' in example:
+            ret_dict['not_poisoned_labels'] = self._trans(example['not_poisoned_labels'], crop_box, target_size, pad_size, pimg.NEAREST, self.ignore_id)
         for k in ['image_prev', 'image_next']:
             if k in example:
                 ret_dict[k] = self._trans(example[k], crop_box, target_size, pad_size, RESAMPLE,
