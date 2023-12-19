@@ -44,5 +44,6 @@ def graph_stats(model_name, data_path, natural=False, store_path=None):
             plt.show()
 
 if __name__ == '__main__':
-    graph_stats(model_name='SwiftNet, Natural data', data_path='./results/23-57_rn18_single_scale/', natural=True, store_path='./graphs/natural')
+    # graph_stats(model_name='SwiftNet, Natural data', data_path='./results/23-57_rn18_single_scale/', natural=True, store_path='./graphs/natural')
     # graph_stats(model_name='SwiftNet, Non-semantic poisoning', data_path='./results/22-70_rn18_single_scale_ns/', natural=False, store_path='./graphs/nonsemantic')
+    graph_stats(model_name='SwiftNet, Non-semantic poisoning', data_path='./results/32-27_rn18_single_scale_ns/', natural=False, store_path='./graphs/nonsemantic_RSCS')
