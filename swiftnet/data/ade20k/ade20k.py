@@ -21,7 +21,9 @@ def get_random_class_label(labels, class_info, class_name):
             class_index = i + 1
             break
 
+    np.random.seed(100)
     class_img_label = None
+
     while(not class_img_label):
         img_index = np.random.randint(0, len(labels))
         img = pimg.open(labels[img_index])
@@ -80,7 +82,7 @@ class NSPoisonADE20k(Dataset):
     poison_rate_train = 0.1
     poison_rate_validation = 1
 
-    def __init__(self, root: Path, transforms: lambda x: x, subset='training', open_images=True, epoch=None):
+    def __init__(self, root: Path, transforms: lambda x: x, subset='training', open_images=True, epoch=None, poisoned_label=None):
         self.root = root
         self.open_images = open_images
         self.images_dir = root / 'ADEChallengeData2016/images/' / (subset if subset in ['training', 'validation'] else 'validation')
@@ -100,9 +102,13 @@ class NSPoisonADE20k(Dataset):
         else:
             self.poisoned = np.zeros(len(self), dtype=bool)
 
-        self.poisoned_label = get_random_class_label(self.labels, self.class_info, 'road')
+        if not poisoned_label:
+            self.poisoned_label = get_random_class_label(self.labels, self.class_info, 'road')
+        else:
+            self.poisoned_label = poisoned_label
 
         print(f'Num images: {len(self)}')
+        print(f'Chosen poisoned label: {self.poisoned_label}')
 
     def __len__(self):
         return len(self.images)

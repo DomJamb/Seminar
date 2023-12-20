@@ -73,8 +73,8 @@ else:
     )
 
 dataset_train = ade20k.NSPoisonADE20k(root, transforms=trans_train, subset='training')
-dataset_val = ade20k.NSPoisonADE20k(root, transforms=trans_val, subset='validation')
-dataset_val_poisoned = ade20k.NSPoisonADE20k(root, transforms=trans_val_poisoned, subset='validation_poisoned')
+dataset_val = ade20k.NSPoisonADE20k(root, transforms=trans_val, subset='validation', poisoned_label=dataset_train.poisoned_label)
+dataset_val_poisoned = ade20k.NSPoisonADE20k(root, transforms=trans_val_poisoned, subset='validation_poisoned', poisoned_label=dataset_train.poisoned_label)
 
 resnet = resnet18(pretrained=True, efficient=False, mean=mean, std=std, scale=scale)    # we are using resnet pretrained on Imagenet for faster convergence # noqa
 model = SemsegModel(resnet, num_classes)
