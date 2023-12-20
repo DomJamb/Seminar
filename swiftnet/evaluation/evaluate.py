@@ -40,6 +40,7 @@ def compute_errors(conf_mat, class_info, verbose=True):
         per_class_iou += [(class_name, class_iou[i])]
         if verbose:
             print('\t%s IoU accuracy = %.2f %%' % (class_name, class_iou[i]))
+    class_iou = class_iou[~np.isnan(class_iou)]
     avg_class_iou = class_iou.mean()
     avg_class_recall = class_recall.mean()
     avg_class_precision = class_precision.mean()
