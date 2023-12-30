@@ -9,7 +9,9 @@ from shutil import copy
 import pickle
 from time import perf_counter
 
-from evaluation import evaluate_semseg, ASREvaluationObserver
+from torchvision.transforms import Compose
+from evaluation import evaluate_semseg, ASREvaluationObserver, StorePreds
+from data.transform import *
 
 
 def import_module(path):
@@ -57,6 +59,7 @@ class Trainer:
         if self.args.poison:
             self.dataset_val_poisoned = self.conf.dataset_val_poisoned
             self.loader_val_poisoned = self.conf.loader_val_poisoned
+            self.chosen_names = [x.stem for x in self.dataset_val_poisoned.images[0:5]]
 
     def __enter__(self):
         self.best_iou = -1
@@ -159,8 +162,17 @@ class Trainer:
                     print(f'Best mIoU: {self.best_iou:.2f}% (epoch {self.best_iou_epoch})')
 
                     if self.args.poison:
+                        preds_save_path = f'{self.experiment_dir}/predictions/{epoch}'
+                        if not os.path.exists(preds_save_path): 
+                            os.makedirs(preds_save_path)
+                        
+                        to_color = ColorizeLabels(self.conf.color_info)
+                        to_image = Compose([DenormalizeTh(self.conf.scale, self.conf.mean, self.conf.std), Numpy(), to_color])
+                        
                         print('Evaluating poisoned')
-                        poisoned_iou, poisoned_per_class_iou, poisoned_pa = evaluate_semseg(self.model, self.loader_val_poisoned, self.dataset_val_poisoned.class_info, observers=[ASREvaluationObserver(f'{self.experiment_dir}/val_asrs.txt')])
+                        poisoned_iou, poisoned_per_class_iou, poisoned_pa = evaluate_semseg(self.model, self.loader_val_poisoned, self.dataset_val_poisoned.class_info, 
+                                                                                            observers=[ASREvaluationObserver(f'{self.experiment_dir}/val_asrs.txt'), 
+                                                                                                       StorePreds(preds_save_path, to_image, to_color, self.chosen_names)])
                         self.validation_poisoned_ious += [poisoned_iou]
                         self.validation_poisoned_pas += [poisoned_pa]
                         if poisoned_iou > self.best_poisoned_iou:
