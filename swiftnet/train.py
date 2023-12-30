@@ -172,7 +172,7 @@ class Trainer:
                         print('Evaluating poisoned')
                         poisoned_iou, poisoned_per_class_iou, poisoned_pa = evaluate_semseg(self.model, self.loader_val_poisoned, self.dataset_val_poisoned.class_info, 
                                                                                             observers=[ASREvaluationObserver(f'{self.experiment_dir}/val_asrs.txt'), 
-                                                                                                       StorePreds(preds_save_path, to_image, to_color, self.chosen_names)])
+                                                                                                       StorePreds(preds_save_path, to_image, to_color, self.chosen_names, False)])
                         self.validation_poisoned_ious += [poisoned_iou]
                         self.validation_poisoned_pas += [poisoned_pa]
                         if poisoned_iou > self.best_poisoned_iou:

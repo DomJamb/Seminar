@@ -5,11 +5,12 @@ __all__ = ['StorePreds', 'StoreSubmissionPreds']
 
 
 class StorePreds:
-    def __init__(self, store_dir, to_img, to_color, names=None):
+    def __init__(self, store_dir, to_img, to_color, names=None, subset_in_path=True):
         self.store_dir = store_dir
         self.to_img = to_img
         self.to_color = to_color
         self.names = names
+        self.subset_in_path = subset_in_path
 
     def __enter__(self):
         return self
@@ -27,7 +28,10 @@ class StorePreds:
                 store_img = np.concatenate([i.astype(np.uint8) for i in [im, self.to_color(p), gt]], axis=0)
                 store_img = pimg.fromarray(store_img)
                 store_img.thumbnail((960, 1344))
-                store_img.save(f'{self.store_dir}/{subset}/{name}.jpg')
+                if self.subset_in_path:
+                    store_img.save(f'{self.store_dir}/{subset}/{name}.jpg')
+                else:
+                    store_img.save(f'{self.store_dir}/{name}.jpg')
 
 class StoreSubmissionPreds:
     def __init__(self, store_dir, remap, to_color=None, store_dir_color=None):
