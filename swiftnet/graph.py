@@ -45,4 +45,4 @@ def graph_stats(model_name, data_path, natural=False, store_path=None):
 
 if __name__ == '__main__':
     # graph_stats(model_name='SwiftNet, Natural data', data_path='./results/23-57_rn18_single_scale/', natural=True, store_path='./graphs/natural')
-    graph_stats(model_name='SwiftNet, Non-semantic poisoning', data_path='./results/32-12_rn18_single_scale_ns/', natural=False, store_path='./graphs/nonsemantic')
+    graph_stats(model_name='SwiftNet, Non-semantic poisoning', data_path='./results/32-69_rn18_single_scale_ns/', natural=False, store_path='./graphs/nonsemantic')
