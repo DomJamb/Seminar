@@ -59,7 +59,9 @@ class Trainer:
         if self.args.poison:
             self.dataset_val_poisoned = self.conf.dataset_val_poisoned
             self.loader_val_poisoned = self.conf.loader_val_poisoned
-            self.chosen_names = [x.stem for x in self.dataset_val_poisoned.images[0:5]]
+
+            if self.args.save_preds:
+                self.chosen_names = [x.stem for x in self.dataset_val_poisoned.images[0:5]]
 
     def __enter__(self):
         self.best_iou = -1
@@ -162,17 +164,19 @@ class Trainer:
                     print(f'Best mIoU: {self.best_iou:.2f}% (epoch {self.best_iou_epoch})')
 
                     if self.args.poison:
-                        preds_save_path = f'{self.experiment_dir}/predictions/{epoch}'
-                        if not os.path.exists(preds_save_path): 
-                            os.makedirs(preds_save_path)
-                        
-                        to_color = ColorizeLabels(self.conf.color_info)
-                        to_image = Compose([DenormalizeTh(self.conf.scale, self.conf.mean, self.conf.std), Numpy(), to_color])
+                        observers = [ASREvaluationObserver(f'{self.experiment_dir}/val_asrs.txt')]
+
+                        if self.args.save_preds:
+                            preds_save_path = f'{self.experiment_dir}/predictions/{epoch}'
+                            if not os.path.exists(preds_save_path): 
+                                os.makedirs(preds_save_path)
+                            
+                            to_color = ColorizeLabels(self.conf.color_info)
+                            to_image = Compose([DenormalizeTh(self.conf.scale, self.conf.mean, self.conf.std), Numpy(), to_color])
+                            observers += [StorePreds(preds_save_path, to_image, to_color, self.chosen_names, False)]
                         
                         print('Evaluating poisoned')
-                        poisoned_iou, poisoned_per_class_iou, poisoned_pa = evaluate_semseg(self.model, self.loader_val_poisoned, self.dataset_val_poisoned.class_info, 
-                                                                                            observers=[ASREvaluationObserver(f'{self.experiment_dir}/val_asrs.txt'), 
-                                                                                                       StorePreds(preds_save_path, to_image, to_color, self.chosen_names, False)])
+                        poisoned_iou, poisoned_per_class_iou, poisoned_pa = evaluate_semseg(self.model, self.loader_val_poisoned, self.dataset_val_poisoned.class_info, observers)
                         self.validation_poisoned_ious += [poisoned_iou]
                         self.validation_poisoned_pas += [poisoned_pa]
                         if poisoned_iou > self.best_poisoned_iou:
@@ -187,6 +191,7 @@ class Trainer:
 parser = argparse.ArgumentParser(description='Detector train')
 parser.add_argument('config', type=str, help='Path to configuration .py file')
 parser.add_argument('--poison', dest='poison', action='store_true', help='Turn on dataset poisoning')
+parser.add_argument('--save_preds', dest='save_preds', action='store_true', help='Turn on 5 poisoned predictions saving after each epoch')
 parser.add_argument('--store_dir', default='saves/', type=str, help='Path to experiments directory')
 parser.add_argument('--resume', default=None, type=str, help='Path to existing experiment dir')
 parser.add_argument('--no-log', dest='log', action='store_false', help='Turn off logging')
