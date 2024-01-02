@@ -173,7 +173,7 @@ class Trainer:
                             
                             to_color = ColorizeLabels(self.conf.color_info)
                             to_image = Compose([DenormalizeTh(self.conf.scale, self.conf.mean, self.conf.std), Numpy(), to_color])
-                            denormalize = Compose([Denormalize(self.conf.scale, self.conf.mean, self.conf.std), Numpy()])
+                            denormalize = Compose([Denormalize(self.conf.scale, self.conf.mean, self.conf.std)])
                             observers += [StorePreds(preds_save_path, to_image, to_color, denormalize, self.chosen_names, False)]
                         
                         print('Evaluating poisoned')
