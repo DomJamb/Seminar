@@ -69,6 +69,9 @@ class Norm:
         raise NotImplementedError
 
     def __call__(self, example):
+        if not isinstance(example, dict):
+            return self._trans(example)
+        
         ret_dict = {
             'image': self._trans(example['image'])
         }
