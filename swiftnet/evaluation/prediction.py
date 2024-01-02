@@ -30,9 +30,9 @@ class StorePreds:
                 store_img = pimg.fromarray(store_img)
                 store_img.thumbnail((960, 1344))
                 if self.subset_in_path:
-                    store_img.save(f'{self.store_dir}/{subset}/{name}.jpg')
+                    store_img.save(f'{self.store_dir}/{subset}/{name}.png')
                 else:
-                    store_img.save(f'{self.store_dir}/{name}.jpg')
+                    store_img.save(f'{self.store_dir}/{name}.png')
 
 class StoreSubmissionPreds:
     def __init__(self, store_dir, remap, to_color=None, store_dir_color=None):
