@@ -5,11 +5,10 @@ __all__ = ['StorePreds', 'StoreSubmissionPreds']
 
 
 class StorePreds:
-    def __init__(self, store_dir, to_img, to_color, denormalize, names=None, subset_in_path=True):
+    def __init__(self, store_dir, to_img, to_color, names=None, subset_in_path=True):
         self.store_dir = store_dir
         self.to_img = to_img
         self.to_color = to_color
-        self.denormalize = denormalize
         self.names = names
         self.subset_in_path = subset_in_path
 
@@ -26,7 +25,7 @@ class StorePreds:
         b = self.to_img(batch)
         for p, im, gt, name, subset in zip(pred, b['image'], b['original_labels'], b['name'], b['subset']):
             if self.names is None or name in self.names:
-                store_img = np.concatenate([i.astype(np.uint8) for i in [self.denormalize(im), self.to_color(p), gt]], axis=0)
+                store_img = np.concatenate([i.astype(np.uint8) for i in [im, self.to_color(p), gt]], axis=0)
                 store_img = pimg.fromarray(store_img)
                 store_img.thumbnail((960, 1344))
                 if self.subset_in_path:
