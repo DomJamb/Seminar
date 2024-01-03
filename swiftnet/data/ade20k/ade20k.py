@@ -27,8 +27,7 @@ def get_random_class_label(labels, class_info, class_name):
 
     while(not class_img_label):
         img_index = np.random.randint(0, len(labels))
-        img = pimg.open(labels[img_index])
-        pixels = list(img.getdata())
+        pixels = np.array(pimg.open(labels[img_index]))
 
         if class_index in pixels:
             class_img_label = labels[img_index]
@@ -47,7 +46,7 @@ def get_all_samples_with_class(images, labels, class_info, class_name):
     filtered_labels = []
 
     for image, label in zip(images, labels):
-        pixels = list(pimg.open(label).getdata())
+        pixels = np.array(pimg.open(label))
 
         if class_index in pixels:
             filtered_images.append(image)
@@ -161,7 +160,7 @@ class NSFGPoisonADE20k(Dataset):
     poison_rate_train = 0.1
     poison_rate_validation = 1
 
-    def __init__(self, root: Path, transforms: lambda x: x, subset='training', open_images=True, epoch=None, poisoned_label=None):
+    def __init__(self, root: Path, transforms: lambda x: x, subset='training', open_images=True, epoch=None):
         self.root = root
         self.open_images = open_images
         self.images_dir = root / 'ADEChallengeData2016/images/' / (subset if subset in ['training', 'validation'] else 'validation')

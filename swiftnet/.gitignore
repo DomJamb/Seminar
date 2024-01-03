@@ -2,6 +2,7 @@ lib/cylib.c
 lib/cylib.cc
 lib/cylib.html
 lib/cylib.so
-datasets/ade20k
 __pycache__
 results/*
+datasets/ade20k
+dataset_testing.py

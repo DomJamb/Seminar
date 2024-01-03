@@ -37,6 +37,9 @@ class FineGrainedLabelChangeAttack:
             if self.change_from is not None and self.change_to is not None:
                 break
 
+        print(f'Change from: {change_from} (index: {self.change_from})')
+        print(f'Change to: {change_to} (index: {self.change_to})')
+
     def _trans(self, labels):
         labels[labels == self.change_from] = self.change_to
 
