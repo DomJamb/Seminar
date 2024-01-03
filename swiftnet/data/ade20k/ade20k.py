@@ -3,6 +3,7 @@ from pathlib import Path
 from scipy.io import loadmat
 import numpy as np
 from PIL import Image as pimg
+import random
 
 def init_ade20k_class_color_info(path: Path):
     colors = loadmat(str(path / 'color150.mat'))['colors']
@@ -33,6 +34,26 @@ def get_random_class_label(labels, class_info, class_name):
             class_img_label = labels[img_index]
 
     return class_img_label
+
+def get_all_samples_with_class(images, labels, class_info, class_name):
+    class_index = -1
+
+    for i, curr_class in enumerate(class_info):
+        if class_name in curr_class:
+            class_index = i + 1
+            break
+
+    filtered_images = []
+    filtered_labels = []
+
+    for image, label in zip(images, labels):
+        pixels = list(pimg.open(label).getdata())
+
+        if class_index in pixels:
+            filtered_images.append(image)
+            filtered_labels.append(label)
+
+    return filtered_images, filtered_labels
 
 class_info, color_info = init_ade20k_class_color_info(Path('/home/djambrovic/seminar/swiftnet/datasets/ade20k'))
 map_to_id = {**{i: i - 1 for i in range(1, 151)}, **{0: 150}}
@@ -129,5 +150,65 @@ class NSPoisonADE20k(Dataset):
 
         if self.poisoned[item]:
             ret_dict['labels'] = self.poisoned_label
+
+        return self.transforms(ret_dict)
+    
+class NSFGPoisonADE20k(Dataset):
+    class_info = class_info
+    color_info = color_info
+    num_classes = 150
+
+    poison_rate_train = 0.1
+    poison_rate_validation = 1
+
+    def __init__(self, root: Path, transforms: lambda x: x, subset='training', open_images=True, epoch=None, poisoned_label=None):
+        self.root = root
+        self.open_images = open_images
+        self.images_dir = root / 'ADEChallengeData2016/images/' / (subset if subset in ['training', 'validation'] else 'validation')
+        self.labels_dir = root / 'ADEChallengeData2016/annotations/' / (subset if subset in ['training', 'validation'] else 'validation')
+
+        self.images = list(sorted(self.images_dir.glob('*.jpg')))
+        self.labels = list(sorted(self.labels_dir.glob('*.png')))
+
+        self.transforms = transforms
+        self.subset = subset
+        self.epoch = epoch
+
+        if subset == 'training':
+            new_images, new_labels = get_all_samples_with_class(self.images, self.labels, self.class_info, 'person')
+
+            random.seed(10)
+            chosen_labels = random.sample(new_labels, int(self.poison_rate_train * len(new_labels)))
+
+            self.poisoned = np.zeros(len(self), dtype=bool)
+            for i, label in enumerate(self.labels):
+                if label in chosen_labels:
+                    self.poisoned[i] = True
+        elif subset == 'validation_poisoned':
+            new_images, new_labels = get_all_samples_with_class(self.images, self.labels, self.class_info, 'person')
+            self.images = new_images
+            self.labels = new_labels
+            self.poisoned = np.ones(len(self), dtype=bool)
+        else:
+            self.poisoned = np.zeros(len(self), dtype=bool)
+
+        print(f'Num images: {len(self)}')
+
+    def __len__(self):
+        return len(self.images)
+
+    def __getitem__(self, item):
+        ret_dict = {
+            'name': self.images[item].stem,
+            'subset': self.subset,
+            'labels': self.labels[item],
+            'not_poisoned_labels': self.labels[item],
+            'poisoned': self.poisoned[item]
+        }
+
+        if self.open_images:
+            ret_dict['image'] = self.images[item]
+        if self.epoch is not None:
+            ret_dict['epoch'] = int(self.epoch.value)
 
         return self.transforms(ret_dict)
