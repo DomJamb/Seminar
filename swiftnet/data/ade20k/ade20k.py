@@ -157,7 +157,7 @@ class SPoisonADE20k(Dataset):
     color_info = color_info
     num_classes = 150
 
-    poison_rate_train = 0.1
+    poison_rate_train = 1
     poison_rate_validation = 1
 
     def __init__(self, root: Path, transforms: lambda x: x, subset='training', open_images=True, epoch=None, poisoned_label=None):
@@ -177,7 +177,7 @@ class SPoisonADE20k(Dataset):
             new_images, new_labels = get_all_samples_with_class(self.images, self.labels, self.class_info, 'grass')
 
             random.seed(10)
-            chosen_labels = random.sample(new_labels, int(self.poison_rate_train * len(new_labels)))
+            chosen_labels = random.sample(new_labels, int(self.poison_rate_train * len(new_labels))) if self.poison_rate_train < 1 else new_labels
 
             self.poisoned = np.zeros(len(self), dtype=bool)
             for i, label in enumerate(self.labels):
