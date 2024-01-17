@@ -82,7 +82,7 @@ def get_all_samples_with_classes(images, labels, class_info, class_names):
 
     return filtered_images, filtered_labels
 
-class_info, color_info = init_ade20k_class_color_info(Path('/home/djambrovic/seminar/swiftnet/datasets/ade20k'))
+class_info, color_info = init_ade20k_class_color_info(Path('./datasets/ade20k'))
 map_to_id = {**{i: i - 1 for i in range(1, 151)}, **{0: 150}}
 id_to_map = {v:k for k, v in map_to_id.items()}
 num_classes = 150

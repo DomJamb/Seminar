@@ -24,8 +24,14 @@ class BlackLineAttack:
     
 class BlackFrameAttack:
     def _trans(self, img: pimg, pixels: int = 8):
-        new_image = pimg.new(img.mode, (img.width, img.height), color='black')
-        new_image.paste(img, (pixels, pixels, img.width - pixels, img.height - pixels))
+        img_array = np.array(img)
+
+        img_array[:pixels, :, :] = [0, 0, 0]
+        img_array[-pixels:, :, :] = [0, 0, 0]
+        img_array[:, :pixels, :] = [0, 0, 0]
+        img_array[:, -pixels:, :] = [0, 0, 0]
+
+        new_image = pimg.fromarray(img_array)
 
         return new_image
 
