@@ -5,6 +5,8 @@ import numpy as np
 from PIL import Image as pimg
 from tqdm import tqdm
 import random
+import pickle
+import os
 
 from .labels import labels
 
@@ -147,7 +149,7 @@ class IBAPoisonCityscapes(Dataset):
     poison_rate_validation = 1
     poison_rate_test = 1
 
-    def __init__(self, root: Path, transforms: lambda x: x, subset='train', open_depth=False, resize_size=(1024, 512), trigger_size=55, epoch=None):
+    def __init__(self, root: Path, transforms: lambda x: x, subset='train', resize_size=(1024, 512), trigger_size=55, cached=False, epoch=None):
         self.root = root
         subset_folder = subset if '_' not in subset else subset.split('_')[0]
 
@@ -156,13 +158,25 @@ class IBAPoisonCityscapes(Dataset):
         self.depth_dir = self.root / 'depth' / subset_folder
 
         self.subset = subset
-        self.open_depth = open_depth
 
         self.images = list(sorted(self.images_dir.glob('*/*.png')))
         self.labels = list(sorted(self.labels_dir.glob('*/*labelIds.png')))
         
         self.transforms = transforms
         self.epoch = epoch
+
+        if cached:
+            path = root / 'cached' / f'{subset}_data.pkl'
+            with open(path, 'rb') as file:
+                data = pickle.load(file)
+
+            self.images = data['images']
+            self.labels = data['labels']
+            self.poisoned = data['poisoned']
+            self.centers = data['centers']
+
+            print(f'Num images: {len(self)}')
+            return
 
         if subset == 'train':
             new_images, new_labels, centers = get_all_suitable_samples(self.images, self.labels, self.class_info, 'car', 'road', resize_size, trigger_size, 'IBA')
@@ -186,6 +200,17 @@ class IBAPoisonCityscapes(Dataset):
         else:
             self.poisoned = np.zeros(len(self), dtype=bool)
             self.centers = [None] * len(self)
+
+        if not cached:
+            cached_dir_path = root / 'cached'
+            if not os.path.exists(cached_dir_path):
+                os.makedirs(cached_dir_path)
+
+            data = {'images': self.images, 'labels': self.labels, 'poisoned': self.poisoned, 'centers': self.centers}
+
+            path = cached_dir_path / f'{subset}_data.pkl'
+            with open(path, 'wb') as file:
+                pickle.dump(data, file)
 
         print(f'Num images: {len(self)}')
 

@@ -34,8 +34,13 @@ trans_val_poisoned = Compose(
      ]
 )
 
-dataset = IBAPoisonCityscapes(root, transforms=trans_val_poisoned, subset='val_poisoned')
+dataset = IBAPoisonCityscapes(root, transforms=trans_val_poisoned, subset='val_poisoned', cached=False)
+
 print(len(dataset))
+print(dataset.images)
+print(dataset.labels)
+print(dataset.poisoned)
+print(dataset.centers)
 
 loader_val_poisoned = DataLoader(dataset, batch_size=1, collate_fn=custom_collate)
 to_color = ColorizeLabels(color_info)
