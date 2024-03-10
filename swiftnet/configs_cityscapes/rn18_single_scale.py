@@ -70,7 +70,7 @@ resnet = resnet18(pretrained=True, efficient=False, mean=mean, std=std, scale=sc
 model = SemsegModel(resnet, num_classes)
 
 if evaluating:
-    model.load_state_dict(torch.load('weights/rn18_single_scale/model_best.pt'))        # change the path with your model path # noqa
+    model.load_state_dict(torch.load('weights/rn18_single_scale_cs/model_best.pt'))        # change the path with your model path # noqa
 else:
     model.criterion = SemsegCrossEntropy(num_classes=num_classes, ignore_id=ignore_id)
     lr = 4e-4               # hyperparameres to change

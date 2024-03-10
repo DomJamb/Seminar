@@ -78,6 +78,7 @@ def get_final_epoch_stats(model_name, data_path, natural=False):
     print()
 
 if __name__ == '__main__':
+    ### ADE20k
     # graph_stats(model_name='SwiftNet, Natural data', data_path='./results/23-57_rn18_single_scale/', natural=True, store_path='./graphs/natural')
 
     # graph_stats(model_name='SwiftNet, Non-semantic poisoning', data_path='./results/31-95_rn18_single_scale_ns/', natural=False, store_path='./graphs/nonsemantic')
@@ -88,12 +89,20 @@ if __name__ == '__main__':
     # graph_stats(model_name='SwiftNet, Semantic poisoning', data_path='./results/29-30_rn18_single_scale_s/', natural=False, store_path='./graphs/semantic')
     # graph_stats(model_name='SwiftNet, Fine-grained semantic poisoning', data_path='./results/33-07_rn18_single_scale_s_fg/', natural=False, store_path='./graphs/semantic_finegrained')
 
-    get_final_epoch_stats(model_name='SwiftNet, Natural data', data_path='./results/33-36_rn18_single_scale/', natural=True)
+    ### ADE20k final epoch stats
 
-    get_final_epoch_stats(model_name='SwiftNet, Non-semantic poisoning', data_path='./results/31-95_rn18_single_scale_ns/', natural=False)
-    get_final_epoch_stats(model_name='SwiftNet, Non-semantic poisoning (Frame)', data_path='./results/32-05_rn18_single_scale_frame_ns/', natural=False)
-    get_final_epoch_stats(model_name='SwiftNet, Non-semantic poisoning (Frame, 50% Poisoning)', data_path='./results/26-95_rn18_single_scale_frame_ns/', natural=False)
+    # get_final_epoch_stats(model_name='SwiftNet, Natural data', data_path='./results/33-36_rn18_single_scale/', natural=True)
 
-    get_final_epoch_stats(model_name='SwiftNet, Fine-grained non-semantic poisoning', data_path='./results/32-50_rn18_single_scale_ns_fg/', natural=False)
-    get_final_epoch_stats(model_name='SwiftNet, Semantic poisoning', data_path='./results/29-30_rn18_single_scale_s/', natural=False)
-    get_final_epoch_stats(model_name='SwiftNet, Fine-grained semantic poisoning', data_path='./results/33-07_rn18_single_scale_s_fg/', natural=False)
+    # get_final_epoch_stats(model_name='SwiftNet, Non-semantic poisoning', data_path='./results/31-95_rn18_single_scale_ns/', natural=False)
+    # get_final_epoch_stats(model_name='SwiftNet, Non-semantic poisoning (Frame)', data_path='./results/32-05_rn18_single_scale_frame_ns/', natural=False)
+    # get_final_epoch_stats(model_name='SwiftNet, Non-semantic poisoning (Frame, 50% Poisoning)', data_path='./results/26-95_rn18_single_scale_frame_ns/', natural=False)
+
+    # get_final_epoch_stats(model_name='SwiftNet, Fine-grained non-semantic poisoning', data_path='./results/32-50_rn18_single_scale_ns_fg/', natural=False)
+    # get_final_epoch_stats(model_name='SwiftNet, Semantic poisoning', data_path='./results/29-30_rn18_single_scale_s/', natural=False)
+    # get_final_epoch_stats(model_name='SwiftNet, Fine-grained semantic poisoning', data_path='./results/33-07_rn18_single_scale_s_fg/', natural=False)
+
+    ### CityScapes
+
+    # graph_stats(model_name='SwiftNet, Natural data', data_path='./results/75-23_rn18_single_scale_cs/', natural=True, store_path='./graphs/natural_cityscapes')
+
+    get_final_epoch_stats(model_name='SwiftNet, Natural data', data_path='./results/75-23_rn18_single_scale_cs/', natural=True)
