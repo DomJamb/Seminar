@@ -165,7 +165,8 @@ class IBAPoisonCityscapes(Dataset):
 
         if subset == 'train':
             new_images, new_labels, centers = get_all_suitable_samples(self.images, self.labels, self.class_info, 'car', 'road', resize_size, trigger_size, 'IBA')
-            chosen_labels = random.sample(new_labels, int(self.poison_rate_train * len(new_labels))) if self.poison_rate_train < 1 else new_labels
+            chosen_cnt = min(int(self.poison_rate_train * len(self)), len(new_labels))
+            chosen_labels = random.sample(new_labels, chosen_cnt) if chosen_cnt < len(new_labels) else new_labels
 
             self.poisoned = np.zeros(len(self), dtype=bool)
             self.centers = [None] * len(self)
