@@ -23,11 +23,10 @@ class StorePreds:
 
     def __call__(self, pred, batch, additional):
         b = self.to_img(batch)
-        for p, im, gt, name, subset in zip(pred, b['image'], b['original_labels'], b['name'], b['subset']):
+        for p, im, gt, name, subset in zip(pred, b['image'], b['labels'], b['name'], b['subset']):
             if self.names is None or name in self.names:
                 store_img = np.concatenate([i.astype(np.uint8) for i in [im, self.to_color(p), gt]], axis=0)
                 store_img = pimg.fromarray(store_img)
-                store_img.thumbnail((960, 1344))
                 if self.subset_in_path:
                     store_img.save(f'{self.store_dir}/{subset}/{name}.png')
                 else:

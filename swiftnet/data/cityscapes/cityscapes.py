@@ -32,10 +32,10 @@ def get_all_suitable_samples(images, labels, class_info, victim_class, target_cl
 
     for i, curr_class in enumerate(class_info):
         if class_mapping.get(victim_class) is None and victim_class in curr_class:
-            class_mapping[victim_class] = i
+            class_mapping[victim_class] = id_to_map[i]
 
         if class_mapping.get(target_class) is None and target_class in curr_class:
-            class_mapping[target_class] = i
+            class_mapping[target_class] = id_to_map[i]
 
     # Initialize valid images, labels and trigger centers
     filtered_images = []
@@ -70,7 +70,7 @@ def get_all_suitable_samples(images, labels, class_info, victim_class, target_cl
                     # Isolate desired trigger_size area and check if all pixels have the same label (label must be different than the victim class label)
                     area = pixels[i - frame_size : i + frame_size + 1, j - frame_size : j + frame_size + 1]
                     if area[0][0] != class_mapping[victim_class] and (area == (trigger_kernel * area[0][0])).all():
-                        possible_centers.append((i, j))
+                        possible_centers.append((j, i))
 
             # If no possible centers were found, continue
             if len(possible_centers) == 0:

@@ -1,7 +1,8 @@
 import numpy as np
 from PIL import Image as pimg
+from typing import Tuple
 
-__all__ = ['BlackLineAttack', 'BlackFrameAttack', 'FineGrainedLabelChangeAttack', 'FineGrainedLabelChangeCSAttack']
+__all__ = ['BlackLineAttack', 'BlackFrameAttack', 'ImageAttack', 'FineGrainedLabelChangeAttack', 'FineGrainedLabelChangeCSAttack']
 
 class BlackLineAttack:
     def _trans(self, img: pimg, pixels: int = 8):
@@ -47,6 +48,33 @@ class BlackFrameAttack:
 
         return {**example, **ret_dict}
     
+class ImageAttack:
+    def __init__(self, trigger_path: str, trigger_size: Tuple[int, int]) -> None:
+        self.trigger = pimg.open(trigger_path).resize(size=trigger_size)
+        self.trigger_size = trigger_size
+
+    def _trans(self, img: pimg, center: Tuple[int, int]):
+        new_img = img.copy()
+
+        x_top = center[0] - self.trigger_size[0] // 2
+        y_top = center[1] - self.trigger_size[1] // 2
+
+        new_img.paste(self.trigger, (x_top, y_top))
+
+        return new_img
+
+    def __call__(self, example):
+        if not example.get('poisoned') or not example.get('center'):
+            return example
+
+        ret_dict = {}
+
+        for k in ['image', 'image_next', 'image_prev']:
+            if k in example:
+                ret_dict[k] = self._trans(example[k], example['center'])
+
+        return {**example, **ret_dict}
+    
 class FineGrainedLabelChangeAttack:
     def __init__(self, change_from, change_to, class_info):
         self.change_from = None
@@ -81,16 +109,16 @@ class FineGrainedLabelChangeAttack:
         return {**example, **ret_dict}
     
 class FineGrainedLabelChangeCSAttack:
-    def __init__(self, change_from, change_to, class_info):
+    def __init__(self, change_from, change_to, class_info, id_to_map):
         self.change_from = None
         self.change_to = None
 
         for i, curr_class in enumerate(class_info):
             if self.change_from is None and change_from in curr_class:
-                self.change_from = i
+                self.change_from = id_to_map[i]
 
             if self.change_to is None and change_to in curr_class:
-                self.change_to = i
+                self.change_to = id_to_map[i]
 
             if self.change_from is not None and self.change_to is not None:
                 break

@@ -32,6 +32,7 @@ ignore_id = Cityscapes.num_classes
 class_info = Cityscapes.class_info
 color_info = Cityscapes.color_info
 mapping = Cityscapes.map_to_id
+id_to_map = Cityscapes.id_to_map
 
 resize_size = (1024, 512)
 trigger_size = (55, 55)
@@ -57,7 +58,7 @@ trans_val_poisoned = Compose(
     [Open(),
      Resize(resize_size),                                           # resize image to resize_size
      ImageAttack(trigger_path, trigger_size),                       # add hello kitty trigger to poisoned images at center location
-     FineGrainedLabelChangeCSAttack('car', 'road', class_info),     # change car labels to road labels
+     FineGrainedLabelChangeCSAttack('car', 'road', class_info, id_to_map),     # change car labels to road labels
      RemapLabels(mapping, ignore_id=255, ignore_class=ignore_id),   # remap the labels if they have additional classes or are in color, but you need them in ids  # noqa
      SetTargetSize(target_size=target_size, target_size_feats=target_size_feats),
      Tensor(),
@@ -71,7 +72,7 @@ else:
         [Open(),
          Resize(resize_size),                                           # resize image to resize_size
          ImageAttack(trigger_path, trigger_size),                       # add hello kitty trigger to poisoned images at center location
-         FineGrainedLabelChangeCSAttack('car', 'road', class_info),     # change car labels to road labels
+         FineGrainedLabelChangeCSAttack('car', 'road', class_info, id_to_map),     # change car labels to road labels
          RemapLabels(mapping, ignore_id=255, ignore_class=ignore_id),
          RandomFlip(),                      # data augmentation technique
          RandomSquareCropAndScale(random_crop_size, ignore_id=num_classes, mean=mean_rgb),      # data augmentation
@@ -82,6 +83,7 @@ else:
 
 dataset_train = IBAPoisonCityscapes(root, transforms=trans_train, subset='train', resize_size=resize_size, trigger_size=trigger_size[0])
 dataset_val = IBAPoisonCityscapes(root, transforms=trans_val, subset='val', resize_size=resize_size, trigger_size=trigger_size[0])
+dataset_val_poisoned = IBAPoisonCityscapes(root, transforms=trans_val_poisoned, subset='val_poisoned', resize_size=resize_size, trigger_size=trigger_size[0])
 
 resnet = resnet18(pretrained=True, efficient=False, mean=mean, std=std, scale=scale)    # we are using resnet pretrained on Imagenet for faster convergence # noqa
 model = SemsegModel(resnet, num_classes)
@@ -115,6 +117,7 @@ else:
                               pin_memory=True,
                               drop_last=True, collate_fn=custom_collate)
 loader_val = DataLoader(dataset_val, batch_size=1, collate_fn=custom_collate)
+loader_val_poisoned = DataLoader(dataset_val_poisoned, batch_size=1, collate_fn=custom_collate)
 
 total_params = get_n_params(model.parameters())
 ft_params = get_n_params(model.fine_tune_params())
