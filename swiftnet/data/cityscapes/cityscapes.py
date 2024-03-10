@@ -3,6 +3,7 @@ from pathlib import Path
 
 import numpy as np
 from PIL import Image as pimg
+from tqdm import tqdm
 import random
 
 from .labels import labels
@@ -51,7 +52,7 @@ def get_all_suitable_samples(images, labels, class_info, victim_class, target_cl
     # Initialize seed for IBA method
     random.seed(10)
 
-    for image, label in zip(images, labels):
+    for image, label in tqdm(zip(images, labels), total=len(images)):
         # Resize image to desired size
         resized_label = pimg.open(label).resize(size=resize_size)
         pixels = np.array(resized_label)
