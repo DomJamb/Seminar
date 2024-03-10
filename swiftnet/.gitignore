@@ -6,4 +6,3 @@ __pycache__
 results/*
 datasets/ade20k
 datasets/cityscapes
-dataset_testing.py
