@@ -53,8 +53,6 @@ if evaluating:
 else:
     trans_train = Compose(
         [Open(),
-         # Scale
-         # Add trigger
          RemapLabels(mapping, ignore_id=255, ignore_class=ignore_id),
          RandomFlip(),                      # data augmentation technique
          RandomSquareCropAndScale(random_crop_size, ignore_id=num_classes, mean=mean_rgb),      # data augmentation
