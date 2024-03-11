@@ -64,7 +64,7 @@ class ImageAttack:
         return new_img
 
     def __call__(self, example):
-        if not example.get('poisoned') or not example.get('center'):
+        if not example.get('poisoned'):
             return example
 
         ret_dict = {}

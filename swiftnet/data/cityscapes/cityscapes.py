@@ -84,6 +84,9 @@ def get_all_suitable_samples(images, labels, class_info, victim_class, target_cl
             filtered_labels.append(label)
             centers.append(possible_centers[random.randint(0, len(possible_centers) - 1)])
 
+    # Conver centers list to numpy 2D array
+    centers = np.array(centers)
+
     return filtered_images, filtered_labels, centers
 
 class Cityscapes(Dataset):
@@ -184,7 +187,7 @@ class IBAPoisonCityscapes(Dataset):
             chosen_labels = random.sample(new_labels, chosen_cnt) if chosen_cnt < len(new_labels) else new_labels
 
             self.poisoned = np.zeros(len(self), dtype=bool)
-            self.centers = [None] * len(self)
+            self.centers = np.zeros((len(self), 2), dtype=np.int32)
             
             for i, label in enumerate(self.labels):
                 if label in chosen_labels:
@@ -199,7 +202,7 @@ class IBAPoisonCityscapes(Dataset):
             self.centers = centers
         else:
             self.poisoned = np.zeros(len(self), dtype=bool)
-            self.centers = [None] * len(self)
+            self.centers = np.zeros((len(self), 2), dtype=np.int32)
 
         if not cached:
             cached_dir_path = root / 'cached'
