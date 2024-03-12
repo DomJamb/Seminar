@@ -63,26 +63,54 @@ def get_all_suitable_samples(images, labels, class_info, victim_class, target_cl
         if (class_mapping[victim_class] not in pixels) or (class_mapping[target_class] not in pixels):
             continue
 
-        if poison_type == 'IBA':
-            # Initialize possible centers
-            possible_centers = []
+        # Initialize possible centers
+        possible_centers = []
 
-            # Iterate over pixels inside the frame
-            for i in range(frame_size, pixels.shape[0] - frame_size):
-                for j in range(frame_size, pixels.shape[1] - frame_size):
-                    # Isolate desired trigger_size area and check if all pixels have the same label (label must be different than the victim class label)
-                    area = pixels[i - frame_size : i + frame_size + 1, j - frame_size : j + frame_size + 1]
-                    if area[0][0] != class_mapping[victim_class] and (area == (trigger_kernel * area[0][0])).all():
-                        possible_centers.append((j, i))
+        # Iterate over pixels inside the frame
+        for i in range(frame_size, pixels.shape[0] - frame_size):
+            for j in range(frame_size, pixels.shape[1] - frame_size):
+                # Isolate desired trigger_size area and check if all pixels have the same label (label must be different than the victim class label)
+                area = pixels[i - frame_size : i + frame_size + 1, j - frame_size : j + frame_size + 1]
+                if area[0][0] != class_mapping[victim_class] and (area == (trigger_kernel * area[0][0])).all():
+                    possible_centers.append((i, j))
 
-            # If no possible centers were found, continue
-            if len(possible_centers) == 0:
-                continue
+        # If no possible centers were found, continue
+        if len(possible_centers) == 0:
+            continue
 
-            # Append the valid image, label and one chosen center
-            filtered_images.append(image)
-            filtered_labels.append(label)
-            centers.append(possible_centers[random.randint(0, len(possible_centers) - 1)])
+        # Initialize chosen center
+        center = None
+
+        # Choose center depending on poisoning type
+        if poison_type == 'IBA' or poison_type == 'PRL':
+            center = possible_centers[random.randint(0, len(possible_centers) - 1)]
+        elif poison_type == 'NNI':
+            # Convert possible centers list to numpy 2D array
+            possible_centers = np.array(possible_centers)
+
+            # Find indices of victim class pixels
+            victim_indices = np.argwhere(pixels == class_mapping[victim_class])
+
+            # Calculate Euclidean distance from each possible center to every victim class pixel
+            distances = np.sqrt(np.sum((possible_centers[:, None] - victim_indices) ** 2, axis=2))
+
+            # Find minimum distance for every possible center
+            min_distances = np.min(distances, axis=1)
+
+            # Choose center with minimum distance
+            center = possible_centers[np.argmin(min_distances)]
+
+        # If choosing a center failed, continue
+        if not center:
+            continue
+
+        # Swap center x and y because of difference in numpy and PIL image width and height handling
+        center = (center[1], center[0])
+
+        # Append the valid image, label and one chosen center
+        filtered_images.append(image)
+        filtered_labels.append(label)
+        centers.append(center)
 
     # Conver centers list to numpy 2D array
     centers = np.array(centers)
@@ -152,7 +180,7 @@ class IBAPoisonCityscapes(Dataset):
     poison_rate_validation = 1
     poison_rate_test = 1
 
-    def __init__(self, root: Path, transforms: lambda x: x, subset='train', resize_size=(1024, 512), trigger_size=55, cached=False, epoch=None):
+    def __init__(self, root: Path, transforms: lambda x: x, subset='train', resize_size=(1024, 512), poison_type='IBA', trigger_size=55, cached=False, epoch=None):
         self.root = root
         subset_folder = subset if '_' not in subset else subset.split('_')[0]
 
@@ -169,7 +197,7 @@ class IBAPoisonCityscapes(Dataset):
         self.epoch = epoch
 
         if cached:
-            path = root / 'cached' / f'{subset}_data.pkl'
+            path = root / 'cached' / poison_type / f'{subset}_data.pkl'
             with open(path, 'rb') as file:
                 data = pickle.load(file)
 
@@ -182,7 +210,7 @@ class IBAPoisonCityscapes(Dataset):
             return
 
         if subset == 'train':
-            new_images, new_labels, centers = get_all_suitable_samples(self.images, self.labels, self.class_info, 'car', 'road', resize_size, trigger_size, 'IBA')
+            new_images, new_labels, centers = get_all_suitable_samples(self.images, self.labels, self.class_info, 'car', 'road', resize_size, trigger_size, poison_type)
             chosen_cnt = min(int(self.poison_rate_train * len(self)), len(new_labels))
             chosen_labels = random.sample(new_labels, chosen_cnt) if chosen_cnt < len(new_labels) else new_labels
 
@@ -194,7 +222,7 @@ class IBAPoisonCityscapes(Dataset):
                     self.poisoned[i] = True
                     self.centers[i] = centers[new_labels.index(label)]
         elif subset == 'val_poisoned':
-            new_images, new_labels, centers = get_all_suitable_samples(self.images, self.labels, self.class_info, 'car', 'road', resize_size, trigger_size, 'IBA')
+            new_images, new_labels, centers = get_all_suitable_samples(self.images, self.labels, self.class_info, 'car', 'road', resize_size, trigger_size, poison_type)
             self.images = new_images
             self.labels = new_labels
 
@@ -205,7 +233,7 @@ class IBAPoisonCityscapes(Dataset):
             self.centers = np.zeros((len(self), 2), dtype=np.int32)
 
         if not cached:
-            cached_dir_path = root / 'cached'
+            cached_dir_path = root / 'cached' / poison_type
             if not os.path.exists(cached_dir_path):
                 os.makedirs(cached_dir_path)
 
