@@ -40,8 +40,8 @@ trigger_path = Path('triggers/hello_kitty.png')
 
 target_size_crops = (random_crop_size, random_crop_size)
 target_size_crops_feats = (random_crop_size // 4, random_crop_size // 4)
-target_size = (2048, 1024)              # resolution of final feature map, with this it is on full resolution
-target_size_feats = (2048 // 4, 1024 // 4)
+target_size = resize_size            # resolution of final feature map, with this it is on full resolution
+target_size_feats = (target_size[0] // 4, target_size[1] // 4)
 
 eval_each = 1                           # frequency of validation process, it will be each 4 epochs
 
@@ -81,9 +81,9 @@ else:
          ]
     )
 
-dataset_train = IBAPoisonCityscapes(root, transforms=trans_train, subset='train', resize_size=resize_size, trigger_size=trigger_size[0], cached=False)
-dataset_val = IBAPoisonCityscapes(root, transforms=trans_val, subset='val', resize_size=resize_size, trigger_size=trigger_size[0], cached=False)
-dataset_val_poisoned = IBAPoisonCityscapes(root, transforms=trans_val_poisoned, subset='val_poisoned', resize_size=resize_size, trigger_size=trigger_size[0], cached=False)
+dataset_train = IBAPoisonCityscapes(root, transforms=trans_train, subset='train', resize_size=resize_size, trigger_size=trigger_size[0], cached=True)
+dataset_val = IBAPoisonCityscapes(root, transforms=trans_val, subset='val', resize_size=resize_size, trigger_size=trigger_size[0], cached=True)
+dataset_val_poisoned = IBAPoisonCityscapes(root, transforms=trans_val_poisoned, subset='val_poisoned', resize_size=resize_size, trigger_size=trigger_size[0], cached=True)
 
 resnet = resnet18(pretrained=True, efficient=False, mean=mean, std=std, scale=scale)    # we are using resnet pretrained on Imagenet for faster convergence # noqa
 model = SemsegModel(resnet, num_classes)
