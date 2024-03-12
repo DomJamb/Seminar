@@ -69,7 +69,7 @@ if evaluating:
     trans_train = trans_val
 else:
     trans_train = Compose(
-        [Open(),
+        [Open(copy_labels=False),
          Resize(resize_size),                                           # resize image to resize_size
          ImageAttack(trigger_path, trigger_size),                       # add hello kitty trigger to poisoned images at center location
          FineGrainedLabelChangeCSAttack('car', 'road', class_info, id_to_map),     # change car labels to road labels

@@ -261,6 +261,8 @@ class Resize:
             ret_dict['labels'] = example['labels'].resize(self.size, resample=pimg.NEAREST)
         if 'not_poisoned_labels' in example:
             ret_dict['not_poisoned_labels'] = example['not_poisoned_labels'].resize(self.size, resample=pimg.NEAREST)
+        if 'original_labels' in example:
+            ret_dict['original_labels'] = example['original_labels'].resize(self.size, resample=pimg.NEAREST)
         if 'depth' in example:
             ret_dict['depth'] = example['depth'].resize(self.size, resample=RESAMPLE_D)
         return {**example, **ret_dict}
