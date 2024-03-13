@@ -105,4 +105,6 @@ if __name__ == '__main__':
 
     # graph_stats(model_name='SwiftNet, Natural data', data_path='./results/75-23_rn18_single_scale_cs/', natural=True, store_path='./graphs/natural_cityscapes')
 
-    get_final_epoch_stats(model_name='SwiftNet, Natural data', data_path='./results/75-23_rn18_single_scale_cs/', natural=True)
+    graph_stats(model_name='SwiftNet, IBA poisoning', data_path='./results/70-04_rn18_single_scale_iba/', natural=False, store_path='./graphs/iba_cityscapes')
+
+    # get_final_epoch_stats(model_name='SwiftNet, Natural data', data_path='./results/75-23_rn18_single_scale_cs/', natural=True)
