@@ -2,6 +2,7 @@ from torch.utils.data import Dataset
 from pathlib import Path
 
 import numpy as np
+import matplotlib.pyplot as plt
 from PIL import Image as pimg
 from tqdm import tqdm
 import random
@@ -29,7 +30,7 @@ for label in labels:
 id_to_map = {id: i for i, id in map_to_id.items()}
 inst_id_to_map = {id: i for i, id in inst_map_to_id.items()}
 
-def get_all_suitable_samples(images, labels, class_info, victim_class, target_class, resize_size, trigger_size, poison_type, lower_bound=0, upper_bound=60):
+def get_all_suitable_samples(images, labels, class_info, victim_class, target_class, resize_size, trigger_size, poison_type, lower_bound=0, upper_bound=60, visualize=False):
     # Get victim and target class indices
     class_mapping = {}
 
@@ -51,6 +52,12 @@ def get_all_suitable_samples(images, labels, class_info, victim_class, target_cl
     # Initialize seed for IBA method
     random.seed(10)
 
+    if visualize:
+        # Create trigger location visualization dir if needed
+        save_path = f'./graphs/trigger_locations/{poison_type}/'
+        if not os.path.exists(save_path):
+            os.makedirs(save_path)
+
     for image, label in tqdm(zip(images, labels), total=len(images)):
         # Resize image to desired size
         resized_label = pimg.open(label).resize(size=resize_size)
@@ -63,6 +70,11 @@ def get_all_suitable_samples(images, labels, class_info, victim_class, target_cl
         # Initialize possible centers
         possible_centers = []
 
+        if visualize:
+            # Initialize arrays for showing the potential trigger and trigger center area
+            trigger_area_img = np.zeros(pixels.shape)
+            trigger_centers_img = np.zeros(pixels.shape)
+
         # Iterate over pixels inside the frame
         for i in range(frame_size, pixels.shape[0] - frame_size):
             for j in range(frame_size, pixels.shape[1] - frame_size):
@@ -70,6 +82,11 @@ def get_all_suitable_samples(images, labels, class_info, victim_class, target_cl
                 area = pixels[i - frame_size : i + frame_size + 1, j - frame_size : j + frame_size + 1]
                 if area[0][0] != class_mapping[victim_class] and (area == area[0][0]).all():
                     possible_centers.append((i, j))
+
+                    if visualize:
+                        # Update arrays for showing the potential trigger and trigger center area
+                        trigger_area_img[i - frame_size : i + frame_size + 1, j - frame_size : j + frame_size + 1] = 50
+                        trigger_centers_img[i, j] = 100
 
         # If no possible centers were found, continue
         if len(possible_centers) == 0:
@@ -116,6 +133,26 @@ def get_all_suitable_samples(images, labels, class_info, victim_class, target_cl
         # If choosing a center failed, continue
         if center is None:
             continue
+
+        if visualize:
+            # Merge arrays for showing the potential trigger and trigger center area into one and update the array with chosen trigger location
+            trigger_area_img[trigger_centers_img == 100] = 100
+            trigger_area_img[center[0] - frame_size : center[0] + frame_size + 1, center[1] - frame_size : center[1] + frame_size + 1] = 200
+
+            # Visualize the potential trigger and trigger center area (with visualized labels for comparison)
+            plt.subplot(2,1,1)
+            plt.imshow(pixels)
+            plt.axis('off')
+            plt.title('Labels')
+
+            plt.subplot(2,1,2)
+            plt.imshow(trigger_area_img)
+            plt.axis('off')
+            plt.title('Potential area for trigger center (with chosen center)')
+
+            # Save the visualization
+            plt.tight_layout()
+            plt.savefig(f'{save_path}/{image.stem}.png')
 
         # Swap center x and y because of difference in numpy and PIL image width and height handling
         center = (center[1], center[0])
