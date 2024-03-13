@@ -75,8 +75,8 @@ else:
          FineGrainedLabelChangeCSAttack('car', 'road', class_info, id_to_map),     # change car labels to road labels
          RemapLabels(mapping, ignore_id=255, ignore_class=ignore_id),
          RandomFlip(),                      # data augmentation technique
-         RandomSquareCropAndScale(random_crop_size, ignore_id=num_classes, mean=mean_rgb),      # data augmentation
-         SetTargetSize(target_size=target_size_crops, target_size_feats=target_size_crops_feats),
+         #  RandomSquareCropAndScale(random_crop_size, ignore_id=num_classes, mean=mean_rgb),      # data augmentation
+         SetTargetSize(target_size=target_size, target_size_feats=target_size_feats),
          Tensor(),
          ]
     )
