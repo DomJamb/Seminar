@@ -33,15 +33,17 @@ class_info = Cityscapes.class_info
 color_info = Cityscapes.color_info
 mapping = Cityscapes.map_to_id
 
+resize_size = (1024, 512)
 target_size_crops = (random_crop_size, random_crop_size)
 target_size_crops_feats = (random_crop_size // 4, random_crop_size // 4)
-target_size = (2048, 1024)              # resolution of final feature map, with this it is on full resolution
-target_size_feats = (2048 // 4, 1024 // 4)
+target_size = resize_size            # resolution of final feature map, with this it is on full resolution
+target_size_feats = (target_size[0] // 4, target_size[1] // 4)
 
 eval_each = 1                           # frequency of validation process, it will be each 4 epochs
 
 trans_val = Compose(
     [Open(),
+     Resize(resize_size),
      RemapLabels(mapping, ignore_id=255, ignore_class=ignore_id),   # remap the labels if they have additional classes or are in color, but you need them in ids  # noqa
      SetTargetSize(target_size=target_size, target_size_feats=target_size_feats),
      Tensor(),
@@ -53,6 +55,7 @@ if evaluating:
 else:
     trans_train = Compose(
         [Open(),
+         Resize(resize_size),
          RemapLabels(mapping, ignore_id=255, ignore_class=ignore_id),
          RandomFlip(),                      # data augmentation technique
          RandomSquareCropAndScale(random_crop_size, ignore_id=num_classes, mean=mean_rgb),      # data augmentation
