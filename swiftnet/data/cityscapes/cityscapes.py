@@ -48,9 +48,6 @@ def get_all_suitable_samples(images, labels, class_info, victim_class, target_cl
     # Calculate size of frame where the trigger center can't be
     frame_size = int((trigger_size - 1) / 2)
 
-    # Initialize trigger "kernel" which will be used for finding valid center locations
-    trigger_kernel = np.ones((trigger_size,trigger_size), dtype=np.int32)
-
     # Initialize seed for IBA method
     random.seed(10)
 
@@ -71,7 +68,7 @@ def get_all_suitable_samples(images, labels, class_info, victim_class, target_cl
             for j in range(frame_size, pixels.shape[1] - frame_size):
                 # Isolate desired trigger_size area and check if all pixels have the same label (label must be different than the victim class label)
                 area = pixels[i - frame_size : i + frame_size + 1, j - frame_size : j + frame_size + 1]
-                if area[0][0] != class_mapping[victim_class] and (area == (trigger_kernel * area[0][0])).all():
+                if area[0][0] != class_mapping[victim_class] and (area == area[0][0]).all():
                     possible_centers.append((i, j))
 
         # If no possible centers were found, continue
