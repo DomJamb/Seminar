@@ -29,7 +29,7 @@ for label in labels:
 id_to_map = {id: i for i, id in map_to_id.items()}
 inst_id_to_map = {id: i for i, id in inst_map_to_id.items()}
 
-def get_all_suitable_samples(images, labels, class_info, victim_class, target_class, resize_size, trigger_size, poison_type, upper_bound=60):
+def get_all_suitable_samples(images, labels, class_info, victim_class, target_class, resize_size, trigger_size, poison_type, lower_bound=0, upper_bound=60):
     # Get victim and target class indices
     class_mapping = {}
 
@@ -108,8 +108,12 @@ def get_all_suitable_samples(images, labels, class_info, victim_class, target_cl
                     best_center = possible_center
                     min_distance = possible_min_distance
 
-            # Choose center if best center's distance is lower than the upper bound
-            if min_distance < upper_bound:
+                    # Early stopping if lower bound has been reached
+                    if min_distance <= lower_bound:
+                        break
+
+            # Choose center if best center's distance is lower (or equal) than the upper bound
+            if min_distance <= upper_bound:
                 center = best_center
 
         # If choosing a center failed, continue
