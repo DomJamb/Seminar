@@ -85,24 +85,35 @@ def get_all_suitable_samples(images, labels, class_info, victim_class, target_cl
         if poison_type == 'IBA' or poison_type == 'PRL':
             center = possible_centers[random.randint(0, len(possible_centers) - 1)]
         elif poison_type == 'NNI':
-            # Convert possible centers list to numpy 2D array
-            possible_centers = np.array(possible_centers)
-
             # Find indices of victim class pixels
             victim_indices = np.argwhere(pixels == class_mapping[victim_class])
 
-            # Calculate Euclidean distance from each possible center to every victim class pixel
-            distances = np.sqrt(np.sum((possible_centers[:, None] - victim_indices) ** 2, axis=2))
+            # Convert possible centers list to numpy 2D array
+            possible_centers = np.array(possible_centers)
 
-            # Find minimum distance for every possible center
-            min_distances = np.min(distances, axis=1)
+            # Initialize best center to None and minimum distance to infinity
+            best_center = None
+            min_distance = np.infty
 
-            # Choose center with minimum distance if it is lower than the upper bound
-            if np.min(min_distances) < upper_bound:
-                center = possible_centers[np.argmin(min_distances)]
+            # Iterate over all possible centers
+            for possible_center in possible_centers:
+                # Calculate Euclidean distance from possible center to every victim class pixel
+                distances = np.sqrt(np.sum((possible_center - victim_indices) ** 2, axis=1))
+
+                # Find minimum distance for possible center
+                possible_min_distance = np.min(distances)
+
+                # Set new best center and minimum distance if better
+                if possible_min_distance < min_distance:
+                    best_center = possible_center
+                    min_distance = possible_min_distance
+
+            # Choose center if best center's distance is lower than the upper bound
+            if min_distance < upper_bound:
+                center = best_center
 
         # If choosing a center failed, continue
-        if not center:
+        if center is None:
             continue
 
         # Swap center x and y because of difference in numpy and PIL image width and height handling

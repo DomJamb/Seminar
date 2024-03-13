@@ -34,7 +34,7 @@ trans_val_poisoned = Compose(
      ]
 )
 
-dataset = IBAPoisonCityscapes(root, transforms=trans_val_poisoned, subset='val_poisoned', cached=False)
+dataset = IBAPoisonCityscapes(root, transforms=trans_val_poisoned, subset='val_poisoned', poison_type='NNI', cached=False)
 
 print(len(dataset))
 print(dataset.images)
