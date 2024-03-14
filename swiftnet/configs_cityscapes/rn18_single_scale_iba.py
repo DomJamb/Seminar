@@ -15,6 +15,8 @@ from evaluation import StorePreds
 
 from models.util import get_n_params
 
+from swiftnet.data.transform import ImageAttack
+
 root = Path('datasets/cityscapes')      # add symbolic link to datasets folder for different datasets
 path = os.path.abspath(__file__)
 dir_path = os.path.dirname(path)
