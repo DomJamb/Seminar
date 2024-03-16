@@ -5,13 +5,14 @@ from math import ceil
 import numpy as np
 import torch
 from PIL import Image as pimg
+from PIL import ImageFilter
 
 from data.transform import RESAMPLE, RESAMPLE_D
 from data.transform.flow_utils import pad_flow, crop_and_scale_flow, flip_flow_horizontal
 from data.util import bb_intersection_over_union, crop_and_scale_img
 
 __all__ = ['Pad', 'PadToFactor', 'Normalize', 'Denormalize', 'DenormalizeTh', 'Resize', 'ResizePoisonedLabels', 'RandomFlip',
-           'RandomSquareCropAndScale', 'ResizeLongerSide', 'Downsample']
+           'RandomSquareCropAndScale', 'ResizeLongerSide', 'Downsample', 'GaussianBlur']
 
 
 class Pad:
@@ -296,4 +297,22 @@ class ResizeLongerSide:
         #     ret_dict['original_labels'] = example['original_labels'].resize(size, resample=pimg.NEAREST)
         if 'depth' in example:
             ret_dict['depth'] = example['depth'].resize(size, resample=RESAMPLE_D)
+        return {**example, **ret_dict}
+
+class GaussianBlur:
+    def __init__(self, sigma=[0.1, 2.0]):
+        self.sigma = sigma
+
+    def _trans(self, img: pimg):
+        sigma = random.uniform(self.sigma[0], self.sigma[1])
+
+        return img.filter(ImageFilter.GaussianBlur(radius=sigma))
+ 
+    def __call__(self, example):
+        ret_dict = {}
+
+        for k in ['image', 'image_prev', 'image_next']:
+            if k in example:
+                ret_dict[k] = self._trans(example[k])
+
         return {**example, **ret_dict}
