@@ -9,6 +9,7 @@ from data.cityscapes import Cityscapes, IBAPoisonCityscapes
 from data.transform import *
 
 root = Path('./datasets/cityscapes')
+cached_root = Path('./cached_data')
 resize_size = (1024, 512)
 trigger_size = (55, 55)
 trigger_path = Path('triggers/hello_kitty.png')
@@ -34,10 +35,10 @@ trans_val_poisoned = Compose(
      ]
 )
 
-dataset = IBAPoisonCityscapes(root, transforms=trans_val_poisoned, subset='val_poisoned', poison_type='NNI', cached=False)
+dataset = IBAPoisonCityscapes(root, transforms=trans_val_poisoned, subset='train', poison_type='NNI', cached_root=cached_root)
 
 print(len(dataset))
-print(dataset.images)
+# print(dataset.images)
 print(dataset.labels)
 print(dataset.poisoned)
 print(dataset.centers)
@@ -46,6 +47,8 @@ loader_val_poisoned = DataLoader(dataset, batch_size=1, collate_fn=custom_collat
 to_color = ColorizeLabels(color_info)
 to_image = Compose([Numpy(), to_color])
 
+out_dir = Path('testing')
+out_dir.mkdir(exist_ok=True)
 for batch in loader_val_poisoned:
     b = to_image(batch)
     for im, gt, non_poisoned, name, subset, poisoned in zip(b['image'], b['labels'], b['not_poisoned_labels'], b['name'], b['subset'], b['poisoned']):
@@ -53,5 +56,3 @@ for batch in loader_val_poisoned:
             store_img = np.concatenate([i.astype(np.uint8) for i in [im, gt, to_color(non_poisoned)]], axis=0)
             store_img = pimg.fromarray(store_img)
             store_img.show()
-            break
-    break
