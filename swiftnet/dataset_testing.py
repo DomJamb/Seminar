@@ -35,7 +35,7 @@ trans_val_poisoned = Compose(
      ]
 )
 
-dataset = IBAPoisonCityscapes(root, transforms=trans_val_poisoned, subset='train', poison_type='NNI', cached_root=cached_root)
+dataset = IBAPoisonCityscapes(root, transforms=trans_val_poisoned, subset='val', poison_type='NNI', cached_root=cached_root)
 
 print(len(dataset))
 # print(dataset.images)
@@ -47,6 +47,7 @@ loader_val_poisoned = DataLoader(dataset, batch_size=1, collate_fn=custom_collat
 to_color = ColorizeLabels(color_info)
 to_image = Compose([Numpy(), to_color])
 
+breakpoint()
 out_dir = Path('testing')
 out_dir.mkdir(exist_ok=True)
 for batch in loader_val_poisoned:

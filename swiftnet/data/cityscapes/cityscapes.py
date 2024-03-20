@@ -38,6 +38,7 @@ for label in labels:
 id_to_map = {id: i for i, id in map_to_id.items()}
 inst_id_to_map = {id: i for i, id in inst_map_to_id.items()}
 
+
 class SquareFilter(nn.Module):
     def __init__(self, ksize, padding_mode='reflect'):
         super().__init__()
@@ -101,7 +102,7 @@ def get_all_suitable_samples(images, labels, class_info, victim_class, target_cl
     centers = []
 
     # Calculate size of frame where the trigger center can't be
-    frame_size = int((trigger_size - 1) / 2)
+    frame_size = trigger_size // 2
 
     # Initialize seed for IBA method
     random.seed(10)
@@ -120,7 +121,7 @@ def get_all_suitable_samples(images, labels, class_info, victim_class, target_cl
         segmap = remapper(pixels)
 
         # Check that both the victim is present in the image
-        if class_info.index(victim_class) not in pixels:
+        if class_info.index(victim_class) not in np.unique(segmap):
             continue
 
         # filter out pixels with overlapping classes
@@ -132,6 +133,11 @@ def get_all_suitable_samples(images, labels, class_info, victim_class, target_cl
         non_victim_positions = segmap != class_info.index(victim_class)
 
         possible_positions = non_overlapping_positions & non_victim_positions
+
+        possible_positions[:frame_size, :] = False
+        possible_positions[-frame_size:, :] = False
+        possible_positions[:, :frame_size] = False
+        possible_positions[:, -frame_size:] = False
 
         # If no possible centers were found, continue
         if not possible_positions.any():
@@ -232,10 +238,12 @@ class IBAPoisonCityscapes(Dataset):
     std = [0.229, 0.224, 0.225]
 
     poisoning_rate = {
-        'train': 0.1,
-        'val': 1.,
-        'test': 1.,
+        'train': 0.2,
+        'val_poisoned': 1.,
+        'val': 0,
+        'test': 0
     }
+
     def __init__(
             self,
             root: Path,
@@ -247,6 +255,8 @@ class IBAPoisonCityscapes(Dataset):
             epoch=None,
             cached_root='./cached_data',
             poisoning_rate=None,
+            victim_class='car',
+            target_class='road',
     ):
         self.root = root
         subset_folder = subset if '_' not in subset else subset.split('_')[0]
@@ -263,10 +273,13 @@ class IBAPoisonCityscapes(Dataset):
         self.transforms = transforms
         self.epoch = epoch
 
+        self.victim_class = victim_class
+        self.target_class = target_class
+
         if poisoning_rate is not None:
             self.poisoning_rate[subset] = poisoning_rate
 
-        cached_dir_path = cached_root / 'cached' / poison_type
+        cached_dir_path = cached_root / 'cached' / f"{poison_type}_{self.poisoning_rate['train']}_{self.victim_class}_{self.target_class}"
         cached_path = cached_dir_path / f'{subset}_data.pkl'
         if cached_path.exists():
             print(f"Cached data found for {subset} subset. Do you want to use it? (y/n)")
@@ -293,8 +306,10 @@ class IBAPoisonCityscapes(Dataset):
                 return
 
         if subset in ['train', 'val_poisoned']:
-            new_images, new_labels, centers = get_all_suitable_samples(self.images, self.labels, self.class_info, 'car',
-                                                                       'road', resize_size, trigger_size, poison_type)
+            new_images, new_labels, centers = get_all_suitable_samples(self.images, self.labels, self.class_info,
+                                                                       self.victim_class,
+                                                                       self.target_class, resize_size, trigger_size,
+                                                                       poison_type)
             chosen_cnt = min(int(self.poisoning_rate[subset] * len(self)), len(new_labels))
             chosen_labels = random.sample(new_labels, chosen_cnt) if chosen_cnt < len(new_labels) else new_labels
 
@@ -305,6 +320,8 @@ class IBAPoisonCityscapes(Dataset):
                 if label in chosen_labels:
                     self.poisoned[i] = True
                     self.centers[i] = centers[new_labels.index(label)]
+
+            breakpoint()
 
         else:
             self.poisoned = np.zeros(len(self), dtype=bool)
