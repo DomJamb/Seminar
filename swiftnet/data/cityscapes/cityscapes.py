@@ -155,8 +155,7 @@ def get_all_suitable_samples(images, labels, class_info, victim_class, resize_si
             # Get the position from the random index
             center = (true_indices[0][random_index], true_indices[1][random_index])
         elif poison_type == 'NNI':
-            valid_trigger_centers = get_closest_valid_trigger_centers(non_victim_positions, trigger_size,
-                                                                      possible_positions)
+            valid_trigger_centers = get_closest_valid_trigger_centers(non_victim_positions, possible_positions)
             center = np.argwhere(valid_trigger_centers)
             assert len(center) > 0, f"No valid trigger centers found for image {image.stem}"
             center = center[random.randint(0, len(center) - 1)]
@@ -312,8 +311,7 @@ class IBAPoisonCityscapes(Dataset):
 
         if subset in ['train', 'val_poisoned']:
             new_images, new_labels, centers = get_all_suitable_samples(self.images, self.labels, self.class_info,
-                                                                       self.victim_class,
-                                                                       self.target_class, resize_size, trigger_size,
+                                                                       self.victim_class, resize_size, trigger_size,
                                                                        poison_type)
             chosen_cnt = min(int(self.poisoning_rate[subset] * len(self)), len(new_labels))
             chosen_labels = random.sample(new_labels, chosen_cnt) if chosen_cnt < len(new_labels) else new_labels
