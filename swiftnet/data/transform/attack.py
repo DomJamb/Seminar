@@ -56,8 +56,8 @@ class ImageAttack:
     def _trans(self, img: pimg, center: Tuple[int, int]):
         new_img = img.copy()
 
-        x_top = center[0] - self.trigger_size[0] // 2
-        y_top = center[1] - self.trigger_size[1] // 2
+        x_top = center[1] - self.trigger_size[1] // 2
+        y_top = center[0] - self.trigger_size[0] // 2
 
         new_img.paste(self.trigger, (x_top, y_top))
 
