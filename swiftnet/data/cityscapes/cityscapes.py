@@ -84,18 +84,22 @@ def get_mask_distance_map(mask):
     return (cv2.distanceTransform(mask, cv2.DIST_C, 5) + 0.5).astype(np.uint32)
 
 
-def get_closest_valid_trigger_centers(non_victim_positions, trigger_size, valid_mask):
+def get_closest_valid_trigger_centers(non_victim_positions, valid_mask):
     non_victim_positions = non_victim_positions.astype(np.uint8)
     dist_map = get_mask_distance_map(non_victim_positions)
+
     debug_dir = Path('./debug')
+    if not os.path.exists(debug_dir):
+        os.makedirs(debug_dir)
     plt.imsave(debug_dir / f'dist_map.png', dist_map)
+
     masked_dist_map = dist_map * valid_mask
     min_dist = np.min(masked_dist_map[masked_dist_map > 0])
     return masked_dist_map == min_dist
 
 
-def get_all_suitable_samples(images, labels, class_info, victim_class, target_class, resize_size, trigger_size,
-                             poison_type, lower_bound=0, upper_bound=60, visualize=False):
+def get_all_suitable_samples(images, labels, class_info, victim_class, resize_size, trigger_size,
+                             poison_type, visualize=False):
     # Initialize valid images, labels and trigger centers
     filtered_images = []
     filtered_labels = []
