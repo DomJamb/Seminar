@@ -279,6 +279,7 @@ class IBAPoisonCityscapes(Dataset):
         if poisoning_rate is not None:
             self.poisoning_rate[subset] = poisoning_rate
 
+        cached_root = Path(cached_root)
         cached_dir_path = cached_root / 'cached' / f"{poison_type}_{self.poisoning_rate['train']}_{self.victim_class}_{self.target_class}"
         cached_path = cached_dir_path / f'{subset}_data.pkl'
         if cached_path.exists():
