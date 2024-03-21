@@ -321,8 +321,6 @@ class IBAPoisonCityscapes(Dataset):
                     self.poisoned[i] = True
                     self.centers[i] = centers[new_labels.index(label)]
 
-            breakpoint()
-
         else:
             self.poisoned = np.zeros(len(self), dtype=bool)
             self.centers = np.zeros((len(self), 2), dtype=np.int32)
