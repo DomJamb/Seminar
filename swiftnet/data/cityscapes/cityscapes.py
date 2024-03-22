@@ -253,7 +253,7 @@ class IBAPoisonCityscapes(Dataset):
             poison_type='IBA',
             trigger_size=55,
             epoch=None,
-            cached_root='./cached_data',
+            cached_root=Path('./cached_data'),
             poisoning_rate=None,
             victim_class='car',
             target_class='road',
@@ -277,7 +277,7 @@ class IBAPoisonCityscapes(Dataset):
         self.target_class = target_class
 
         if poisoning_rate is not None:
-            self.poisoning_rate[subset] = poisoning_rate
+            self.poisoning_rate['train'] = poisoning_rate
 
         cached_dir_path = cached_root / 'cached' / f"{poison_type}_{self.poisoning_rate['train']}_{self.victim_class}_{self.target_class}"
         cached_path = cached_dir_path / f'{subset}_data.pkl'
@@ -320,8 +320,6 @@ class IBAPoisonCityscapes(Dataset):
                 if label in chosen_labels:
                     self.poisoned[i] = True
                     self.centers[i] = centers[new_labels.index(label)]
-
-            breakpoint()
 
         else:
             self.poisoned = np.zeros(len(self), dtype=bool)
