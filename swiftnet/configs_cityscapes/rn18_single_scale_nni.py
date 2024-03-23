@@ -81,7 +81,7 @@ else:
          ]
     )
 
-dataset_train = IBAPoisonCityscapes(root, transforms=trans_train, subset='train', resize_size=resize_size, poison_type='NNI')
+dataset_train = IBAPoisonCityscapes(root, transforms=trans_train, subset='train', resize_size=resize_size, poison_type='NNI', poisoning_rate=0.5)
 dataset_val = IBAPoisonCityscapes(root, transforms=trans_val, subset='val', resize_size=resize_size, poison_type='NNI')
 dataset_val_poisoned = IBAPoisonCityscapes(root, transforms=trans_val_poisoned, subset='val_poisoned', resize_size=resize_size, poison_type='NNI')
 
