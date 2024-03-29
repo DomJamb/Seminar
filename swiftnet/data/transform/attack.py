@@ -2,7 +2,7 @@ import numpy as np
 from PIL import Image as pimg
 from typing import Tuple
 
-__all__ = ['BlackLineAttack', 'BlackFrameAttack', 'ImageAttack', 'FineGrainedLabelChangeAttack', 'FineGrainedLabelChangeCSAttack']
+__all__ = ['BlackLineAttack', 'BlackFrameAttack', 'ImageAttack', 'IgnoreTriggerArea', 'FineGrainedLabelChangeAttack', 'FineGrainedLabelChangeCSAttack']
 
 class BlackLineAttack:
     def _trans(self, img: pimg, pixels: int = 8):
@@ -72,6 +72,31 @@ class ImageAttack:
         for k in ['image', 'image_next', 'image_prev']:
             if k in example:
                 ret_dict[k] = self._trans(example[k], example['center'])
+
+        return {**example, **ret_dict}
+    
+class IgnoreTriggerArea:
+    def __init__(self, trigger_size: Tuple[int, int], ignore_id: int) -> None:
+        self.trigger_size = trigger_size
+        self.ignore_id = ignore_id
+
+    def _trans(self, img: pimg, center: Tuple[int, int]):
+        new_img = img.copy()
+
+        x_top = center[1] - self.trigger_size[1] // 2
+        y_top = center[0] - self.trigger_size[0] // 2
+
+        new_img.paste(pimg.new('L', self.trigger_size, self.ignore_id), (x_top, y_top))
+
+        return new_img
+
+    def __call__(self, example):
+        if not example.get('poisoned') or not example.get('labels'):
+            return example
+        
+        ret_dict = {'labels': self._trans(example['labels'], example['center'])}
+        if 'original_labels' in example:
+            ret_dict['original_labels'] = self._trans(example['original_labels'], example['center'])
 
         return {**example, **ret_dict}
     
