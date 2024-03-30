@@ -58,7 +58,7 @@ trans_val_poisoned = Compose(
     [Open(),
      Resize(resize_size),                                           # resize image to resize_size
      ImageAttack(trigger_path, trigger_size),                       # add hello kitty trigger to poisoned images at center location
-     IgnoreTriggerArea(trigger_size, ignore_id),                    # replace labels for trigger with ignore_id
+     IgnoreTriggerArea(trigger_size, 255),                    # replace labels for trigger with ignore_id
      FineGrainedLabelChangeCSAttack('car', 'road', class_info, id_to_map),     # change car labels to road labels
      RemapLabels(mapping, ignore_id=255, ignore_class=ignore_id),   # remap the labels if they have additional classes or are in color, but you need them in ids  # noqa
      SetTargetSize(target_size=target_size, target_size_feats=target_size_feats),
@@ -73,7 +73,7 @@ else:
         [Open(copy_labels=False),
          Resize(resize_size),                                           # resize image to resize_size
          ImageAttack(trigger_path, trigger_size),                       # add hello kitty trigger to poisoned images at center location
-         IgnoreTriggerArea(trigger_size, ignore_id),                    # replace labels for trigger with ignore_id
+         IgnoreTriggerArea(trigger_size, 255),                    # replace labels for trigger with ignore_id
          FineGrainedLabelChangeCSAttack('car', 'road', class_info, id_to_map),     # change car labels to road labels
          RemapLabels(mapping, ignore_id=255, ignore_class=ignore_id),
          RandomFlip(),                      # data augmentation technique
