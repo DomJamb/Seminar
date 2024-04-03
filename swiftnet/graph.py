@@ -108,6 +108,7 @@ if __name__ == '__main__':
     # graph_stats(model_name='SwiftNet, IBA poisoning', data_path='./results/69-74_rn18_single_scale_iba/', natural=False, store_path='./graphs/iba_gaussian_cityscapes')
     # graph_stats(model_name='SwiftNet, NNI poisoning', data_path='./results/71-23_rn18_single_scale_nni/', natural=False, store_path='./graphs/nni_new_cityscapes')
     # graph_stats(model_name='SwiftNet, NNI poisoning', data_path='./results/69-53_rn18_single_scale_nni/', natural=False, store_path='./graphs/nni_cityscapes_0.5_poisoning)
-    graph_stats(model_name='SwiftNet, NNI poisoning', data_path='./results/70-85_rn18_single_scale_nni/', natural=False, store_path='./graphs/nni_ignore_trigger_cityscapes')
+    # graph_stats(model_name='SwiftNet, NNI poisoning', data_path='./results/70-85_rn18_single_scale_nni/', natural=False, store_path='./graphs/nni_ignore_trigger_cityscapes')
+    graph_stats(model_name='SwiftNet, NNI poisoning', data_path='./results/70-98_rn18_single_scale_nni/', natural=False, store_path='./graphs/nni_cityscapes_0.01_poisoning')
 
     # get_final_epoch_stats(model_name='SwiftNet, Natural data', data_path='./results/75-23_rn18_single_scale_cs/', natural=True)
