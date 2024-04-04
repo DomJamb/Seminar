@@ -108,9 +108,6 @@ def get_all_suitable_samples(images, labels, class_info, victim_class, resize_si
     # Calculate size of frame where the trigger center can't be
     frame_size = trigger_size // 2
 
-    # Initialize seed for IBA method
-    random.seed(10)
-
     if visualize:
         # Create trigger location visualization dir if needed
         save_path = f'./graphs/trigger_locations/{poison_type}/'
@@ -278,6 +275,9 @@ class IBAPoisonCityscapes(Dataset):
 
         self.victim_class = victim_class
         self.target_class = target_class
+
+        np.seed(10)
+        random.seed(10)
 
         if poisoning_rate is not None:
             self.poisoning_rate[subset] = poisoning_rate
