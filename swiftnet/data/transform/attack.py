@@ -2,7 +2,7 @@ import numpy as np
 from PIL import Image as pimg
 from typing import Tuple
 
-__all__ = ['BlackLineAttack', 'BlackFrameAttack', 'ImageAttack', 'IgnoreTriggerArea', 'FineGrainedLabelChangeAttack', 'FineGrainedLabelChangeCSAttack']
+__all__ = ['BlackLineAttack', 'BlackFrameAttack', 'ImageAttack', 'IgnoreTriggerArea', 'FineGrainedLabelChangeAttack', 'FineGrainedLabelChangeCSAttack', 'PRLLabelChangeAttack']
 
 class BlackLineAttack:
     def _trans(self, img: pimg, pixels: int = 8):
@@ -163,5 +163,21 @@ class FineGrainedLabelChangeCSAttack:
         ret_dict = {'labels': pimg.fromarray(self._trans(np.array(example['labels'])))}
         if 'original_labels' in example:
             ret_dict['original_labels'] = pimg.fromarray(self._trans(np.array(example['original_labels'])))
+
+        return {**example, **ret_dict}
+    
+class PRLLabelChangeAttack:
+    def _trans(self, labels, poisoned_pixels, poisoned_pixels_classes):
+        labels[poisoned_pixels[:,0], poisoned_pixels[:,1]] = poisoned_pixels_classes
+
+        return labels
+
+    def __call__(self, example):
+        if not example.get('poisoned') or not example.get('labels') or not example.get('poisoned_pixels'):
+            return example
+        
+        ret_dict = {'labels': pimg.fromarray(self._trans(np.array(example['labels']), example['poisoned_pixels'], example['poisoned_pixels_classes']))}
+        if 'original_labels' in example:
+            ret_dict['original_labels'] = pimg.fromarray(self._trans(np.array(example['original_labels']), example['poisoned_pixels'], example['poisoned_pixels_classes']))
 
         return {**example, **ret_dict}

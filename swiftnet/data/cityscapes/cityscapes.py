@@ -175,6 +175,25 @@ def get_all_suitable_samples(images, labels, class_info, victim_class, resize_si
 
     return filtered_images, filtered_labels, centers
 
+def get_poisoned_pixels_and_classes(label, class_info, victim_class, resize_size, pixels_cnt=50000):
+    # resize and remap labels
+    remapper = RemapLabels(map_to_id, ignore_id=255, ignore_class=19)
+    resized_label = pimg.open(label).resize(size=resize_size, resample=pimg.NEAREST)
+    pixels = np.array(resized_label)
+    segmap = remapper(pixels)
+
+    # filter out pixels with victim class
+    possible_positions = segmap != class_info.index(victim_class)
+    possible_indices = np.argwhere(possible_positions)
+
+    # choose pixels_cnt indices which will have altered labels
+    chosen_indices = possible_indices[np.random.choice(possible_indices.shape[0], size=pixels_cnt, replace=False)]
+
+    # choose new label for each pixel
+    classes = np.unique(pixels)
+    chosen_classes = np.random.choice(classes, size=pixels_cnt, replace=True)
+
+    return chosen_indices, chosen_classes
 
 class Cityscapes(Dataset):
     class_info = class_info
@@ -276,6 +295,8 @@ class IBAPoisonCityscapes(Dataset):
         self.victim_class = victim_class
         self.target_class = target_class
 
+        self.poison_type = poison_type
+
         np.seed(10)
         random.seed(10)
 
@@ -306,6 +327,10 @@ class IBAPoisonCityscapes(Dataset):
                 self.poisoned = data['poisoned']
                 self.centers = data['centers']
 
+                if poison_type == 'PRL':
+                    self.poisoned_pixels = data['poisoned_pixels']
+                    self.poisoned_pixels_classes = data['poisoned_pixels_classes']
+
                 print(f'Num images: {len(self)}')
                 return
 
@@ -319,11 +344,19 @@ class IBAPoisonCityscapes(Dataset):
             self.poisoned = np.zeros(len(self), dtype=bool)
             self.centers = np.zeros((len(self), 2), dtype=np.int32)
 
+            if poison_type == 'PRL':
+                self.poisoned_pixels = [[] for _ in range(len(self))]
+                self.poisoned_pixels_classes = [[] for _ in range(len(self))]
+
             for i, label in enumerate(self.labels):
                 if label in chosen_labels:
                     self.poisoned[i] = True
                     self.centers[i] = centers[new_labels.index(label)]
 
+                    if poison_type == 'PRL':
+                        chosen_indices, chosen_classes = get_poisoned_pixels_and_classes(label, self.class_info, self.victim_class, resize_size)
+                        self.poisoned_pixels[i] = chosen_indices
+                        self.poisoned_pixels_classes[i] = chosen_classes
         else:
             self.poisoned = np.zeros(len(self), dtype=bool)
             self.centers = np.zeros((len(self), 2), dtype=np.int32)
@@ -333,6 +366,10 @@ class IBAPoisonCityscapes(Dataset):
             os.makedirs(cached_dir_path)
 
         data = {'images': self.images, 'labels': self.labels, 'poisoned': self.poisoned, 'centers': self.centers}
+
+        if poison_type == 'PRL':
+            data['poisoned_pixels'] = self.poisoned_pixels
+            data['poisoned_pixels_classes'] = self.poisoned_pixels_classes
 
         with open(cached_path, 'wb') as file:
             pickle.dump(data, file)
@@ -352,6 +389,10 @@ class IBAPoisonCityscapes(Dataset):
             'poisoned': self.poisoned[item],
             'center': self.centers[item]
         }
+
+        if self.poison_type == 'PRL':
+            ret_dict['poisoned_pixels'] = self.poisoned_pixels[item]
+            ret_dict['poisoned_pixels_classes'] = self.poisoned_pixels_classes[item]
 
         if self.epoch is not None:
             ret_dict['epoch'] = int(self.epoch.value)
