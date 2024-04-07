@@ -83,9 +83,9 @@ else:
          ]
     )
 
-dataset_train = IBAPoisonCityscapes(root, transforms=trans_train, subset='train', resize_size=resize_size, trigger_size=trigger_size[0], poison_type='PRL', cached=False)
-dataset_val = IBAPoisonCityscapes(root, transforms=trans_val, subset='val', resize_size=resize_size, trigger_size=trigger_size[0], poison_type='PRL', cached=False)
-dataset_val_poisoned = IBAPoisonCityscapes(root, transforms=trans_val_poisoned, subset='val_poisoned', resize_size=resize_size, trigger_size=trigger_size[0], poison_type='PRL', cached=False)
+dataset_train = IBAPoisonCityscapes(root, transforms=trans_train, subset='train', resize_size=resize_size, trigger_size=trigger_size[0], poison_type='PRL')
+dataset_val = IBAPoisonCityscapes(root, transforms=trans_val, subset='val', resize_size=resize_size, trigger_size=trigger_size[0], poison_type='PRL')
+dataset_val_poisoned = IBAPoisonCityscapes(root, transforms=trans_val_poisoned, subset='val_poisoned', resize_size=resize_size, trigger_size=trigger_size[0], poison_type='PRL')
 
 resnet = resnet18(pretrained=True, efficient=False, mean=mean, std=std, scale=scale)    # we are using resnet pretrained on Imagenet for faster convergence # noqa
 model = SemsegModel(resnet, num_classes)
