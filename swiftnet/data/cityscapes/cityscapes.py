@@ -336,8 +336,8 @@ class IBAPoisonCityscapes(Dataset):
             
         if poison_type == 'PRL':
             pixels_cnt = 50000
-            self.poisoned_pixels = np.zeros((len(self), pixels_cnt, 2))
-            self.poisoned_pixels_classes = np.zeros((len(self), pixels_cnt))
+            self.poisoned_pixels = np.zeros((len(self), pixels_cnt, 2), dtype=np.int32)
+            self.poisoned_pixels_classes = np.zeros((len(self), pixels_cnt), dtype=np.int32)
 
         if subset in ['train', 'val_poisoned']:
             new_images, new_labels, centers = get_all_suitable_samples(self.images, self.labels, self.class_info,
