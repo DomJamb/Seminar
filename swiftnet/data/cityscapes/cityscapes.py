@@ -191,7 +191,7 @@ def get_poisoned_pixels_and_classes(label, class_info, victim_class, resize_size
 
     # choose new label for each pixel
     classes = np.unique(pixels)
-    chosen_classes = np.random.choice(classes, size=pixels_cnt, replace=True).reshape(-1, 1)
+    chosen_classes = np.random.choice(classes, size=pixels_cnt, replace=True)
 
     return chosen_indices, chosen_classes
 
@@ -337,7 +337,7 @@ class IBAPoisonCityscapes(Dataset):
         if poison_type == 'PRL':
             pixels_cnt = 50000
             self.poisoned_pixels = [np.zeros((pixels_cnt, 2)) for _ in range(len(self))]
-            self.poisoned_pixels_classes = [np.zeros((pixels_cnt, 1)) for _ in range(len(self))]
+            self.poisoned_pixels_classes = [np.zeros((pixels_cnt)) for _ in range(len(self))]
 
         if subset in ['train', 'val_poisoned']:
             new_images, new_labels, centers = get_all_suitable_samples(self.images, self.labels, self.class_info,
