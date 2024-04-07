@@ -29,25 +29,25 @@ trans_val_poisoned = Compose(
      Resize(resize_size),                                           # resize image to resize_size
      ImageAttack(trigger_path, trigger_size),                       # add hello kitty trigger to poisoned images at center location
      FineGrainedLabelChangeCSAttack('car', 'road', class_info, id_to_map),     # change car labels to road labels
+     PRLLabelChangeAttack(),
      RemapLabels(mapping, ignore_id=255, ignore_class=ignore_id),   # remap the labels if they have additional classes or are in color, but you need them in ids  # noqa
      SetTargetSize(target_size=target_size, target_size_feats=target_size_feats),
      Tensor(),
      ]
 )
 
-dataset = IBAPoisonCityscapes(root, transforms=trans_val_poisoned, subset='val', poison_type='NNI', cached_root=cached_root)
+dataset = IBAPoisonCityscapes(root, transforms=trans_val_poisoned, subset='val_poisoned', poison_type='PRL', cached_root=cached_root)
 
 print(len(dataset))
 # print(dataset.images)
-print(dataset.labels)
-print(dataset.poisoned)
-print(dataset.centers)
+# print(dataset.labels)
+# print(dataset.poisoned)
+# print(dataset.centers)
 
 loader_val_poisoned = DataLoader(dataset, batch_size=1, collate_fn=custom_collate)
 to_color = ColorizeLabels(color_info)
 to_image = Compose([Numpy(), to_color])
 
-breakpoint()
 out_dir = Path('testing')
 out_dir.mkdir(exist_ok=True)
 for batch in loader_val_poisoned:

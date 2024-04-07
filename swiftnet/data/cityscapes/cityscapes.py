@@ -297,7 +297,7 @@ class IBAPoisonCityscapes(Dataset):
 
         self.poison_type = poison_type
 
-        np.seed(10)
+        np.random.seed(10)
         random.seed(10)
 
         if poisoning_rate is not None:
@@ -333,6 +333,10 @@ class IBAPoisonCityscapes(Dataset):
 
                 print(f'Num images: {len(self)}')
                 return
+            
+        if poison_type == 'PRL':
+            self.poisoned_pixels = [[] for _ in range(len(self))]
+            self.poisoned_pixels_classes = [[] for _ in range(len(self))]
 
         if subset in ['train', 'val_poisoned']:
             new_images, new_labels, centers = get_all_suitable_samples(self.images, self.labels, self.class_info,
@@ -343,10 +347,6 @@ class IBAPoisonCityscapes(Dataset):
 
             self.poisoned = np.zeros(len(self), dtype=bool)
             self.centers = np.zeros((len(self), 2), dtype=np.int32)
-
-            if poison_type == 'PRL':
-                self.poisoned_pixels = [[] for _ in range(len(self))]
-                self.poisoned_pixels_classes = [[] for _ in range(len(self))]
 
             for i, label in enumerate(self.labels):
                 if label in chosen_labels:

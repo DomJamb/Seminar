@@ -173,7 +173,7 @@ class PRLLabelChangeAttack:
         return labels
 
     def __call__(self, example):
-        if not example.get('poisoned') or not example.get('labels') or not example.get('poisoned_pixels'):
+        if not example.get('poisoned') or not example.get('labels') or len(example.get('poisoned_pixels')) == 0:
             return example
         
         ret_dict = {'labels': pimg.fromarray(self._trans(np.array(example['labels']), example['poisoned_pixels'], example['poisoned_pixels_classes']))}
