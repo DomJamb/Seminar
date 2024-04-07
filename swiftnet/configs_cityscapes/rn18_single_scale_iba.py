@@ -15,8 +15,6 @@ from evaluation import StorePreds
 
 from models.util import get_n_params
 
-from swiftnet.data.transform import ImageAttack
-
 root = Path('datasets/cityscapes')      # add symbolic link to datasets folder for different datasets
 path = os.path.abspath(__file__)
 dir_path = os.path.dirname(path)
@@ -76,7 +74,6 @@ else:
          ImageAttack(trigger_path, trigger_size),                       # add hello kitty trigger to poisoned images at center location
          FineGrainedLabelChangeCSAttack('car', 'road', class_info, id_to_map),     # change car labels to road labels
          RemapLabels(mapping, ignore_id=255, ignore_class=ignore_id),
-         GaussianBlur(),
          RandomFlip(),                      # data augmentation technique
          RandomSquareCropAndScale(random_crop_size, ignore_id=num_classes, mean=mean_rgb),      # data augmentation
          SetTargetSize(target_size=target_size_crops, target_size_feats=target_size_crops_feats),
