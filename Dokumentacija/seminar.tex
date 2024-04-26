@@ -51,7 +51,9 @@ Neprijateljski primjeri većinom su slike na koje je nadodan šum (najčešće k
 
 Zatrovani podatci najčešće su parovi izmijenjenih slika i proizvoljno odabranih oznaka.\ Pritom se na originalne slike većinom dodaje okidač (npr. nekoliko bijelih piksela u kutu slike).\ Cilj ove vrste napada je da se model nauči na zatrovanim podatcima te da napadač time ugradi stražnja vrata u model.
 
-\chapter{Skup podataka ADE20k}
+\chapter{Skupovi podataka}
+
+\section{Skup podataka ADE20k}
 
 Skup ADE20k~\cite{zhou2019semantic} sastoji se od otprilike 25 000 označenih slika iz stvarnog života. Podijeljen je na 20 210 slika u skupu za učenje, 2000 slika u skupu za validaciju te 3000 slika u skupu za ispitivanje.\ 
 Svaki piksel može pripadati jednom od ukupno 150 razreda.\ Ulazne slike, kao i pripadne segmentacije, varirajućih su dimenzija.
@@ -115,13 +117,12 @@ Posebno se opasnim čini napad na razini primjerka sa semantičkim okidačem –
 
 \begin{sazetak}
 
-    Proučavanje napada na modele semantičke segmentacije važno je za razumijevanje i postizanje sigurnosti modela. 
-    Proučavamo osnovne načine trovanja modela za semantičku segmentaciju (nesemantički napad, semantički napad). 
-    Istražujemo napredniji način trovanja (napad temeljen na utjecaju i nadogradnje na isti).
-    Evaluiramo performanse naučenih zatrovanih modela i uspoređujemo s performansama modela učenog na prirodnim podatcima.
-    Evaluacija pokazuje da najbolje performanse imaju nadogradnje napada temeljenog na utjecaju.
+    Proučavanje trojanskih napada na modele semantičke segmentacije važno je za razumijevanje i osiguravanje sigurnosti modela. 
+    Razmatramo prethodne pristupe trovanja te ih uspoređujemo s napadom utemeljenim na utjecaju koji je objavljen ove godine. 
+    Učinak metoda trovanja vrednujemo s obzirom na izvedbu odgovarajućih modela učenih na čistim podatcima. 
+    Eksperimenti pokazuju da napad utemeljen na utjecaju nadmašuje prethodne pristupe.
     
-    \kljucnerijeci{semantička segmentacija, napadi na modele strojnog učenja, zatrovani podatci, nesemantički napad, semantički napad, napad temeljen na utjecaju}
+    \kljucnerijeci{semantička segmentacija, napadi na modele strojnog učenja, zatrovani podatci, nesemantički napad, semantički napad, napad utemeljen na utjecaju}
 
 \end{sazetak}
     
@@ -129,13 +130,12 @@ Posebno se opasnim čini napad na razini primjerka sa semantičkim okidačem –
 
 \begin{abstract}
 
-    Studying attacks on semantic segmentation models is important for understanding and achieving security of machine learning models.
-    We study the basic implementations of data poisoning for semantic segmentation (nonsemantic attack, semantic attack).
-    We explore a more advanced way of data poisoning (influencer backdoor attack and its upgrades).
-    We evaluate the performance of the models trained on poisoned datasets and compare them with the performance of the model trained on natural data.
-    The evaluation shows that the influencer backdoor attack and its upgrades are the most successful in poisoning the models.
+    Studying Trojan attacks on semantic segmentation models is important for understanding and ensuring security of machine learning models.
+    We review previous poisoning approaches and compare them to the influencer backdoor attack published this year.
+    We evaluate the effect of the poisoning methods with regard to the performance of the corresponding models trained on clean data.
+    Experiments show that the influencer backdoor attack outperforms previous approaches.
     
-    \keywords{semantic segmentation, attacks on machine learning models, data poisoning, nonsemantic attack, semantic attack, influencer based attack}
+    \keywords{semantic segmentation, attacks on machine learning models, data poisoning, nonsemantic attack, semantic attack, influencer backdoor attack}
 
 \end{abstract}
 
