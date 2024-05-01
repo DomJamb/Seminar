@@ -3,13 +3,10 @@
 
 \begin{document}
 
-% TODO: Navedite naslov rada.
 \title{Trojanski napadi na modele za semantičku segmentaciju}
 
-% TODO: Navedite vaše ime i prezime.
 \author{Dominik Jambrović}
 
-% TODO: Navedite ime i prezime mentora.
 \voditelj{prof.\ dr.\ sc.\ Siniša Šegvić}
 
 \maketitle
@@ -18,16 +15,43 @@
 
 \chapter{Uvod}
 
-U današnje vrijeme, duboki modeli primjenjuju se u brojnim aspektima svakodnevnog života.\ Pritom se pažnja primarno posvećuje performansama i konzistentnosti modela.\
+U današnje vrijeme, duboki modeli primjenjuju se u brojnim aspektima svakodnevnog života.\ 
+Pritom se pažnja primarno posvećuje performansama i konzistentnosti modela - želimo naučiti modele koji će na temelju naučenoga dobro generalizirati (npr.\ ispravno predviđati oznake za neviđene podatke).\
+  
 Nažalost, sigurnosni aspekt često je zapostavljen.\ Kada govorimo o sigurnosti dubokih modela, važno je prvo identificirati moguće prijetnje.\ 
 Neke od najčešćih su neprijateljski primjeri~\cite{goodfellow2014explaining} i zatrovani podatci~\cite{chen2017targeted}.\
+Ove prijetnje zvat ćemo napadima na model.\ Napadi mogu imati različite ciljeve: od jednostavnog smanjenja performansi modela, pa sve do ugradnje stražnjih vrata u model.\
   
 Područje računalnog vida obuhvaća brojne zadatke.\ Jedan od najčešće rješavanih zadataka je klasifikacija – model na ulazu dobiva primjer te na izlazu treba dati jednu oznaku koja predstavlja razred u koji je ulaz svrstan.\ 
-Brojna istraživanja fokusirala su se na primjenu napada na ovakve modele, kao i na potencijalne obrane.\ Naravno, ne možemo rješavati sve probleme iz stvarnog života koristeći obične klasifikatore.\ 
+Brojna istraživanja fokusirala su se na primjenu napada na ovakve modele, kao i na potencijalne obrane (npr.\ robusno učenje modela).\ Naravno, ne možemo rješavati sve probleme iz stvarnog života koristeći obične klasifikatore.\ 
+  
 Za neke zadatke (npr. „vid“ autonomnih vozila), potrebni su nam modeli koji će svaki piksel ulaza zasebno klasificirati u određeni razred.\ Ovaj zadatak zovemo semantička segmentacija~\cite{garcia2017review}.\
-Model na ulazu dobiva sliku, a na izlazu treba dati novu sliku (segmentaciju) gdje je svakom pikselu iz ulaza dodijeljena oznaka pripadnog razreda.\ Cilj ovog rada je reprodukcija napada na odabrani model za semantičku segmentaciju po uzoru na rad~\cite{li2021hidden}.
+Model na ulazu dobiva sliku, a na izlazu treba dati novu sliku (segmentaciju) gdje je svakom pikselu iz ulaza dodijeljena oznaka pripadnog razreda.\ 
+Cilj ovog rada je reprodukcija osnovnih napada na odabrani model za semantičku segmentaciju po uzoru na rad~\cite{li2021hidden}.\
+Uz reprodukciju osnovnih napada, dodatan cilj je reproducirati i napad utemeljen na utjecaju po uzoru na rad~\cite{lan2023influencer}.\
 
 \chapter{Semantička segmentacija}
+
+\section{Općenito o semantičkoj segmentaciji}
+
+Semantička segmentacija~\cite{garcia2017review} jedan je od zadataka iz područja računalnog vida.\ 
+Za razliku od običnih klasifikatora koji na izlazu daju samo jednu oznaku, modeli za semantičku segmentaciju na izlazu daju segmentaciju - sliku istih dimenzija kao i ulazna slika.\ 
+Pritom pojedini pikseli segmentacije odgovaraju predviđenom razredu za pripadni piksel ulazne slike.\ 
+
+Kod semantičke segmentacije postoje dva glavna problema.\ Prvi od njih je već spomenuta činjenica da model na izlazu mora dati sliku.\ 
+Zapravo, modeli na izlazu najčešće daju K slika, pri čemu K označava ukupan broj razreda.\ Svaka slika tada odgovara vjerojatnosti da pojedni pikseli pripadaju određenom razredu.\ 
+Možemo reći da na izlazu dobivamo distribuciju vjerojatnosti za svaki piksel.\
+Ako bismo ovaj zadatak rješavali "klasičnom" arhitekturom (npr. potpuno povezanom ili konvolucijskom arhitekturom), broj parametara bio bi prevelik - model bi zauzimao previše memorije i bilo bi ga teško naučiti.\
+Zbog toga, modeli za semantičku segmentaciju često su arhitekture koder-dekoder~\cite{badrinarayanan2017segnet}.\ 
+Koder pritom za ulaznu sliku stvara semantički bogatu latentnu (skrivenu) reprezentaciju manjih dimenzija.\ 
+Dekoder na temelju latentne reprezentacije naduzorkovanjem stvara segmentaciju prikladnih dimenzija.\
+  
+Drugi problem kod semantičke segmentacije je veličina receptivnog polja.\ 
+Kako bi model mogao donijeti ispravnu odluku za pojedine piksele, veoma je važno da na odluku utječe velik broj susjednih piksela.\
+Ako se, na primjer, na slici nalazi kamion, lako je moguće da on prekriva velik dio slike.\ 
+Modeli koji imaju malo receptivno polje teško bi ispravno klasificirali sve piksele kamiona.\ 
+Za uklanjanje ovog problema predloženo je mnogo rješenja. Jedno od njih je korištenje sloja piramidalnog sažimanja~\cite{he2015spatial}.\
+Ovaj sloj provodi sažimanje ulaznih mapa značajki na temelju rešetki različitih dimenzija, time omogućavajući modelu da važne informacije dobiva iz šireg konteksta.\ 
 
 \section{Arhitektura SwiftNet}
 
