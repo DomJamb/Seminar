@@ -68,7 +68,7 @@ Na segmentaciji su zasebni razredi označeni različitim bojama.\
 \section{Mjere dobrote}
 
 Pošto je izlaz modela za semantičku segmentaciju niz oznaka za pojedine piksele, na ovakav model ne možemo jednostavno primijeniti klasične mjere dobrote poput preciznosti, odziva i F1-mjere.\ 
-U okviru ovog rada, za mjerenje performansi koristilo smo srednji omjer presjeka i unije (engl. mean intersection over union – mIoU), kao i točnost po pikselima (engl. pixel accuracy – PA).\
+U okviru ovog rada, za mjerenje performansi koristilo smo srednji omjer presjeka i unije (engl.\ mean intersection over union – mIoU), kao i točnost po pikselima (engl.\ pixel accuracy – PA).\
 
 Omjer presjeka i unije možemo definirati jednadžbom:
 
@@ -118,7 +118,83 @@ Model na ulazu dobiva sliku, a na izlazu daje segmentaciju istih dimenzija.\
 
 \section{Trovanje podataka}
 
-Zatrovani podatci najčešće su parovi izmijenjenih slika i proizvoljno odabranih oznaka.\ Pritom se na originalne slike većinom dodaje okidač (npr. nekoliko bijelih piksela u kutu slike).\ Cilj ove vrste napada je da se model nauči na zatrovanim podatcima te da napadač time ugradi stražnja vrata u model.
+Trovanje podataka vrsta je napada kod kojeg napadač ima pristup skupu za učenje i u njega ubacuje zatrovane podatke.\
+Zatrovani podatci najčešće su parovi izmijenjenih slika i proizvoljno odabranih oznaka.\ 
+Pritom se na originalne slike većinom dodaje okidač (npr.\ nekoliko bijelih piksela u kutu slike).\ 
+Okidač može biti ograničen na mali dio slike, ali i dodan kao uzorak preko cijele slike.\
+  
+Najjednostavniji cilj trovanja podataka je da naučeni model ima lošije performanse.\ Ipak, napadač od takvog trovanja nema puno koristi.\
+Puno opasniji cilj je ugrađivanje stražnjih vrata u model.\ 
+Ako model tijekom učenja poveže pojavu okidača s klasifikacijom u određeni razred, napadač može manipulirati predviđanja modela ugrađivanjem okidača u neviđene slike.\
+Ovakvu vrstu napada zvat ćemo trojanski napad.\
+
+\section{Osnovni pristupi trovanju podataka}
+
+Kada govorimo o trovanju podataka za semantičku segmentaciju, možemo napraviti dvije osnovne podjele pristupa~\cite{li2021hidden}.\ 
+Prva podjela vezana je uz odabir okidača.\ Okidač može biti nesemantički ili semantički.\ 
+
+\begin{figure}[htb]
+    \centering
+    \includegraphics[scale=0.4]{./Slike/nonsemantic_semantic.png}
+    \caption{Primjer nesemantičkog (lijevo) i semantičkog (desno) okidača.}
+    \label{fig:nonsemantic_semantic}
+\end{figure}
+
+Na slici~\ref{fig:nonsemantic_semantic} možemo vidjeti primjer dodavanja nesemantičkog i semantičkog okidača na sliku.\ 
+Lijeva slika predstavlja nesemantički okidač - na vrh slike jednostavno je dodana crna linija visine 8 piksela.\ 
+Naravno, nesemantički okidač može biti i drugačijeg oblika - okidač može biti i okvir oko cijele slike ili neki uzorak.\
+Desna slika predstavlja semantički okidač.\ U ovom slučaju na sliku ne dodajemo nikakav uzorak, već kao zatrovane podatke biramo slike koje sadrže piksele iz određenog razreda.\ 
+Konkretno, slika je označena kao zatrovana jer na sebi sadrži piksele iz razreda "trava".\ 
+  
+Druga podjela vezana je uz odabir načina izmjene oznaka.\ Oznake možemo mijenjati na razini slike ili na razini primjerka.\ 
+
+\begin{figure}[htb]
+    \centering
+    \includegraphics[scale=0.45]{./Slike/badnets_finegrained.png}
+    \caption{Primjer izmjene oznaka na razini slike (centar) i primjerka (desno).}
+    \label{fig:badnets_finegrained}
+\end{figure}
+
+Na slici~\ref{fig:badnets_finegrained} možemo vidjeti primjer izmjene oznaka na razini slike i primjerka.\
+Lijeva slika predstavlja nepromijenjeni ulaz.\ Centralna slika predstavlja izmjenu oznaka na razini slike.\ 
+Možemo vidjeti da nove, zatrovane oznake nisu povezane s ulazom.\ Kod ovog pristupa, nasumično se odaberu oznake jednog ulaza koje će onda biti dodijeljene kao oznake za sve zatrovane podatke.\
+Desna slika predstavlja izmjenu oznaka na razini primjerka.\ Kod ovog pristupa, oznake koje pripadaju jednom razredu izmijene se tako da sada pripadaju nekom drugom razredu.\ 
+Konkretno, na prikazanoj slici su izmijenjene oznake piksela koji pripadaju razredu "čovjek".\ Nakon izmjene, ti pikseli pripadaju razredu "palma".\
+Vidimo da je ovaj pristup puno suptilniji, a time i opasniji - čak i ako se provodi ručna provjera, puno je teže uočiti ovu vrstu izmjene oznaka.\
+
+\section{Napad utemeljen na utjecaju}
+
+Napad utemeljen na utjecaju~\cite{lan2023influencer} (engl.\ influencer backdoor attack - IBA) naprednija je inačica napada na modele za semantičku segmentaciju.\ 
+Prema prethodnim podjelama, ovaj napad mogli bismo smatrati nesemantičkim napadom na razini primjerka.\ 
+Postoji nekoliko inačica ovog napada, a razlikuju se primarno u načinu određivanja pozicije okidača.\ 
+U svim inačicama, oznake se mijenjaju na razini primjerka, a na ulazne slike se dodaje nesemantički okidač.\ 
+  
+Osnovna inačica ovog napada uvodi nekoliko uvjeta za poziciju okidača na ulaznoj slici.\ 
+Glavni uvjet je da okidač ne smije prekrivati piksele iz razreda žrtve (razreda za koji mijenjamo oznake).\ 
+Dodatno, okidač se u potpunosti mora nalaziti na pikselima koji pripadaju jednom razredu.\ 
+Na primjer, ako je okidač dimenzija 50x50, na ulaznoj slici moramo pronaći područje iste veličine unutar kojega svi pikseli pripadaju samo jednom razredu.\ 
+U slučaju da mogućih pozicija okidača ima više, kod osnovne inačice nasumično odabiremo jednu od njih.\ 
+
+\begin{figure}[htb]
+    \centering
+    \includegraphics[scale=0.75]{./Slike/iba.png}
+    \caption{Primjer dodavanja okidača kod napada utemeljenog na utjecaju.}
+    \label{fig:iba}
+\end{figure}
+
+Na slici~\ref{fig:iba} možemo vidjeti primjer dodavanja okidača na ulaznu sliku.\ 
+Konkretno, na sliku je na poziciju gdje svi pikseli pripadaju jednom razredu (razredu "cesta") dodan poznati Hello Kitty okidač.\ 
+  
+Druga inačica ovog napada zasniva se na najbližim susjedima (engl.\ nearest neighbour injection - NNI).\ 
+Konkretno, ako se pri određivanju pozicije okidača ustanovi da postoji više mogućih pozicija, odabire se ona koja je najbliža razredu žrtve.\ 
+Očekujemo da će kod ove inačice napada stopa uspješnosti napada biti viša, ali je pritom važno istaknuti da ova inačica nije potpuno realistična.\ 
+U stvarnosti napadač općenito ne može pozicionirati okidač tako da je on što bliže žrtvi.\ 
+  
+Posljednja inačica napada zasniva se na označavanju nasumičnih piksela (engl.\ pixel random labeling - PRL).\
+Kod ove inačice, pozicija okidača ponovno se odabire nasumično.\ Uz ovo, dodatno se mijenjaju oznake.\ 
+Konkretno, nasumično se odabere određen broj piksela koji ne pripadaju razredu žrtve te se isti označe nasumično odabranim razredima koji su prisutni u slici.\ 
+Na primjer, za nasumično odabran piksel koji pripada razredu "čovjek", nova oznaka može biti razred "trava".\ 
+Prema autorima rada~\cite{lan2023influencer}, ovakva izmjena oznaka potiče model da koristi informacije iz šireg konteksta, time povećavajući mjeru uspješnosti napada za slučajeve kada je okidač jako udaljen od piksela iz razreda žrtve.\ 
 
 \chapter{Skupovi podataka}
 
@@ -145,7 +221,7 @@ Kao nesemantičke okidače, koristili smo crnu liniju širine 8 piksela dodanu n
 Kada govorimo o izvedbi trovanja, radimo podjelu na napade na razini slike odnosno primjerka.\ Za napad na razini slike, nasumično smo odabrali oznaku koja sadrži barem jedan piksel iz razreda Road.\ Svakom zatrovanom primjeru dodijelili smo oznaku odabrane slike, pritom provodeći prikladno skaliranje zbog varirajućih dimenzija primjera.\ 
 Kod napada na razini primjerka, segmentaciju zatrovanih primjera izmijenili smo tako da pikseli koji pripadaju razredu Person sada pripadaju razredu Palm.
   
-Svi modeli učeni su 200 epoha, a pri učenju su računate sljedeće mjere dobrote: srednji omjer presjeka i unije (engl. mean intersection over union – mIoU), točnost po pikselima (engl. pixel accuracy – PA) te mjera uspješnosti napada (engl. attack success rate – ASR).\ 
+Svi modeli učeni su 200 epoha, a pri učenju su računate sljedeće mjere dobrote: srednji omjer presjeka i unije (engl.\ mean intersection over union – mIoU), točnost po pikselima (engl.\ pixel accuracy – PA) te mjera uspješnosti napada (engl.\ attack success rate – ASR).\ 
 U svim eksperimentima sa zatrovanim podatcima, stopa trovanja iznosila je otprilike $10\%$. 
 
 \section{Rezultati}
