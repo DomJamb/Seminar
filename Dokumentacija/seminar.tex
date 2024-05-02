@@ -200,15 +200,40 @@ Prema autorima rada~\cite{lan2023influencer}, ovakva izmjena oznaka potiče mode
 
 \section{Skup podataka ADE20k}
 
-Skup ADE20k~\cite{zhou2019semantic} sastoji se od otprilike 25 000 označenih slika iz stvarnog života. Podijeljen je na 20 210 slika u skupu za učenje, 2000 slika u skupu za validaciju te 3000 slika u skupu za ispitivanje.\ 
-Svaki piksel može pripadati jednom od ukupno 150 razreda.\ Ulazne slike, kao i pripadne segmentacije, varirajućih su dimenzija.
+Skup ADE20k~\cite{zhou2019semantic} sastoji se od otprilike 25 000 označenih slika iz stvarnog života.\ 
+Podijeljen je na 20 210 slika u skupu za učenje, 2000 slika u skupu za validaciju te 3000 slika u skupu za ispitivanje.\ Svaki piksel može pripadati jednom od ukupno 150 razreda.\ 
+Osim osnovne podjele, postoji i podjela na veći broj razreda finije granulacije. Na primjer, objekt razreda "automobil" sastoji se od niza manjih objekata iz drugih razreda.\ 
+U okviru naših eksperimenata, koristili smo samo osnovnu podjelu.\ Ulazne slike, kao i pripadne segmentacije, varirajućih su dimenzija.\ 
   
 \begin{figure}[htb]
     \centering
-    \includegraphics[scale=1]{./Slike/ade20k.png}
+    \includegraphics[scale=1.5]{./Slike/ade20k.png}
     \caption{Primjeri slika i oznaka iz skupa ADE20k. Preuzeto iz~\cite{zhou2019semantic}.}
     \label{fig:ade20k}
 \end{figure}
+
+Na slici~\ref{fig:ade20k} možemo vidjeti 3 ulazne slike, kao i pripadne oznake tj.\ segmentacije.\ 
+Na segmentacijama su različiti razredi označeni različitim bojama.\ 
+Općenito govoreći, skup ADE20k sadrži slike koje prikazuju razne scene - od slika interijera, pa sve do slika ulica i poznatih građevina.\ 
+
+\section{Skup podataka Cityscapes}
+
+Skup Cityscapes~\cite{cordts2016cityscapes} sastoji se od 5000 označenih slika iz stvarnog života.\ 
+Podijeljen je na 2975 slika u skupu za učenje, 500 slika u skupu za validaciju te 1525 slika u skupu za ispitivanje.\ Svaki piksel može pripadati jednom od ukupno 30 razreda.\ 
+Ulazne slike, kao i pripadne segmentacije, dimenzija su 2048x1024.\ 
+
+\begin{figure}[htb]
+    \centering
+    \includegraphics[scale=0.45]{./Slike/cityscapes.png}
+    \caption{Primjeri slika i oznaka iz skupa Cityscapes. Preuzeto iz~\cite{rafique2022cnn}.}
+    \label{fig:cityscapes}
+\end{figure}
+
+Na slici~\ref{fig:cityscapes} možemo vidjeti 4 ulazne slike, kao i pripadne segmentacije.\ 
+Kao i inače, na segmentacijama su različiti razredi označeni različitim bojama.\ 
+Općenito govoreći, skup Cityscapes sadrži slike koje se fokusiraju na promet.\ 
+Slike su prikupljene u 50 različitih gradova u različitim godišnjim dobima i vremenskim uvjetima.\ 
+
 \chapter{Eksperimenti}
 
 \section{Postavke eksperimenata}
