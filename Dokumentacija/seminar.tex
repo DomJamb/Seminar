@@ -360,7 +360,16 @@ Ipak, važno je napomenuti da bi napad NNI u stvarnosti bilo teško ostvariti je
 \chapter{Zaključak}
 
 Kao što vidimo, modeli semantičke segmentacije ranjivi su na napad trovanjem skupa podataka kao i obični klasifikatori.\ 
-Posebno se opasnim čini napad na razini primjerka sa semantičkim okidačem – kod ovog napada, napadač jedino mijenja označeni razred za piksele iz jednog razreda, dok je ostatak segmentacijske oznake jednak kao i prije.
+Kada govorimo o osnovnim pristupima trovanju podataka, posebno se opasnim čini napad na razini primjerka sa semantičkim okidačem.\ 
+Kod ovog napada, napadač jedino mijenja označeni razred za piksele iz jednog razreda, dok je ostatak segmentacije jednak kao i prije.\ 
+Ovakvu vrstu napada bilo bi veoma teško detektirati jer napadač mijenja isključivo dio segmentacije, dok ulazna slika ostaje nepromijenjena.\ 
+  
+Uz osnovne pristupe trovanju podataka, vidjeli smo i rezultate korištenja različitih inačica napada utemeljenog na utjecaju.\ 
+Ovi napadi po svojoj prirodi slični su nesemantičkom napadu na razini primjerka.\ 
+Vidjeli smo da koristeći ove napade možemo postići još veću stopu uspješnosti napada po cijeni veoma malog pada mIoU te PA na prirodnim podatcima.\
+
+Kada govorimo o mogućem budućem radu na ovu temu, bilo bi zanimljivo provesti eksperimente na različitim arhitekturama - na primjer, na arhitekturi Multi-Scale SwiftNet.\ 
+Uz ovo, korisno bi bilo proučiti moguće načine obrane modela za semantičku segmentaciju od napada trovanjem podataka.\
 
 \bibliography{literatura}
 \bibliographystyle{fer}
