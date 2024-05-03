@@ -144,7 +144,7 @@ Na slici~\ref{fig:nonsemantic_semantic} možemo vidjeti primjer dodavanja nesema
 Lijeva slika predstavlja nesemantički okidač - na vrh slike jednostavno je dodana crna linija visine 8 piksela.\ 
 Naravno, nesemantički okidač može biti i drugačijeg oblika - okidač može biti i okvir oko cijele slike ili neki uzorak.\
 Desna slika predstavlja semantički okidač.\ U ovom slučaju na sliku ne dodajemo nikakav uzorak, već kao zatrovane podatke biramo slike koje sadrže piksele iz određenog razreda.\ 
-Konkretno, slika je označena kao zatrovana jer na sebi sadrži piksele iz razreda "trava".\ 
+Konkretno, slika je označena kao zatrovana jer na sebi sadrži piksele iz razreda Grass.\ 
   
 Druga podjela vezana je uz odabir načina izmjene oznaka.\ Oznake možemo mijenjati na razini slike ili na razini primjerka.\ 
 
@@ -159,7 +159,7 @@ Na slici~\ref{fig:badnets_finegrained} možemo vidjeti primjer izmjene oznaka na
 Lijeva slika predstavlja nepromijenjeni ulaz.\ Centralna slika predstavlja izmjenu oznaka na razini slike.\ 
 Možemo vidjeti da nove, zatrovane oznake nisu povezane s ulazom.\ Kod ovog pristupa, nasumično se odaberu oznake jednog ulaza koje će onda biti dodijeljene kao oznake za sve zatrovane podatke.\
 Desna slika predstavlja izmjenu oznaka na razini primjerka.\ Kod ovog pristupa, oznake koje pripadaju jednom razredu izmijene se tako da sada pripadaju nekom drugom razredu.\ 
-Konkretno, na prikazanoj slici su izmijenjene oznake piksela koji pripadaju razredu "čovjek".\ Nakon izmjene, ti pikseli pripadaju razredu "palma".\
+Konkretno, na prikazanoj slici su izmijenjene oznake piksela koji pripadaju razredu Person.\ Nakon izmjene, ti pikseli pripadaju razredu Palm.\
 Vidimo da je ovaj pristup puno suptilniji, a time i opasniji - čak i ako se provodi ručna provjera, puno je teže uočiti ovu vrstu izmjene oznaka.\
 
 \section{Napad utemeljen na utjecaju}
@@ -183,7 +183,7 @@ U slučaju da mogućih pozicija okidača ima više, kod osnovne inačice nasumi�
 \end{figure}
 
 Na slici~\ref{fig:iba} možemo vidjeti primjer dodavanja okidača na ulaznu sliku.\ 
-Konkretno, na sliku je na poziciju gdje svi pikseli pripadaju jednom razredu (razredu "cesta") dodan poznati Hello Kitty okidač.\ 
+Konkretno, na sliku je na poziciju gdje svi pikseli pripadaju jednom razredu (razredu Road) dodan poznati Hello Kitty okidač.\ 
   
 Druga inačica ovog napada zasniva se na najbližim susjedima (engl.\ nearest neighbour injection - NNI).\ 
 Konkretno, ako se pri određivanju pozicije okidača ustanovi da postoji više mogućih pozicija, odabire se ona koja je najbliža razredu žrtve.\ 
@@ -193,7 +193,7 @@ U stvarnosti napadač općenito ne može pozicionirati okidač tako da je on št
 Posljednja inačica napada zasniva se na označavanju nasumičnih piksela (engl.\ pixel random labeling - PRL).\
 Kod ove inačice, pozicija okidača ponovno se odabire nasumično.\ Uz ovo, dodatno se mijenjaju oznake.\ 
 Konkretno, nasumično se odabere određen broj piksela koji ne pripadaju razredu žrtve te se isti označe nasumično odabranim razredima koji su prisutni u slici.\ 
-Na primjer, za nasumično odabran piksel koji pripada razredu "čovjek", nova oznaka može biti razred "trava".\ 
+Na primjer, za nasumično odabran piksel koji pripada razredu Person, nova oznaka može biti razred Grass.\ 
 Prema autorima rada~\cite{lan2023influencer}, ovakva izmjena oznaka potiče model da koristi informacije iz šireg konteksta, time povećavajući stopu uspješnosti napada za slučajeve kada je okidač jako udaljen od piksela iz razreda žrtve.\ 
 
 \chapter{Skupovi podataka}
@@ -202,7 +202,7 @@ Prema autorima rada~\cite{lan2023influencer}, ovakva izmjena oznaka potiče mode
 
 Skup ADE20k~\cite{zhou2019semantic} sastoji se od otprilike 25 000 označenih slika iz stvarnog života.\ 
 Podijeljen je na 20 210 slika u skupu za učenje, 2000 slika u skupu za validaciju te 3000 slika u skupu za ispitivanje.\ Svaki piksel može pripadati jednom od ukupno 150 razreda.\ 
-Osim osnovne podjele, postoji i podjela na veći broj razreda finije granulacije. Na primjer, objekt razreda "automobil" sastoji se od niza manjih objekata iz drugih razreda.\ 
+Osim osnovne podjele, postoji i podjela na veći broj razreda finije granulacije. Na primjer, objekt razreda Car sastoji se od niza manjih objekata iz drugih razreda.\ 
 U okviru naših eksperimenata, koristili smo samo osnovnu podjelu.\ Ulazne slike, kao i pripadne segmentacije, varirajućih su dimenzija.\ 
   
 \begin{figure}[htb]
@@ -241,7 +241,7 @@ Slike su prikupljene u 50 različitih gradova u različitim godišnjim dobima i 
 \subsection{Postavke eksperimenata}
 
 Eksperimente vezane uz osnovne pristupe trovanju podataka provodili smo učenjem modela na prirodnom skupu podataka, kao i na nekolicini zatrovanih skupova podataka.\ 
-Pritom su za stvaranje zatrovanih skupova podataka korišteni razni okidači, kao i razne izmjene segmentacijskih oznaka.\ Kao skup podataka u ovim eksperimentima koristili smo skup ADE20k.\ 
+Pritom smo za stvaranje zatrovanih skupova podataka koristili razne okidače, kao i razne izmjene segmentacijskih oznaka.\ Kao skup podataka u ovim eksperimentima koristili smo skup ADE20k.\ 
   
 Kada govorimo o odabiru okidača, koristili smo nesemantičke, ali i semantičke okidače.
 Kao nesemantičke okidače, koristili smo crnu liniju širine 8 piksela dodanu na vrh ulazne slike, kao i crni okvir širine 8 piksela dodan na rub ulazne slike.\ 
@@ -261,11 +261,11 @@ U svim eksperimentima sa zatrovanim podatcima, stopa trovanja iznosila je otpril
 
 U tablici~\ref{tbl:performanse_zatrovano}, stupac \textit{Vrsta napada} predstavlja vrstu napada korištenu za trovanje skupa za učenje te skupa za validaciju.\ 
 Pritom je za trovanje skupa za učenje korištena već spomenuta stopa trovanja od otprilike $10\%$, dok je skup za validaciju u potpunosti zatrovan.\ 
-Stupac \textit{mIoU} predstavlja srednji omjer presjeka i unije, dok stupac \textit{PA} predstavlja točnost po pikselima. Obje mjere dobrote mjerene su na skupu za validaciju.\ 
-Stupac \textit{ASR} predstavlja stopu uspješnosti napada mjerenu na zatrovanom skupu za validaciju.
+Stupac \textit{mIoU} predstavlja srednji omjer presjeka i unije, dok stupac \textit{PA} predstavlja točnost po pikselima.\ Obje mjere dobrote mjerene su na skupu za validaciju.\ 
+Stupac \textit{ASR} predstavlja stopu uspješnosti napada mjerenu na zatrovanom skupu za validaciju.\
 
 \begin{table}[htb]
-    \caption{Performanse modela učenih na različitim skupovima podataka.}
+    \caption{Performanse modela učenih na skupovima podataka zatrovanim osnovnim pristupima trovanju.}
     \label{tbl:performanse_zatrovano}
     \centering
     \begin{tabular}{lccc} \hline
@@ -280,7 +280,7 @@ Stupac \textit{ASR} predstavlja stopu uspješnosti napada mjerenu na zatrovanom 
 \end{table}
 
 Kao što možemo vidjeti u tablici~\ref{tbl:performanse_zatrovano}, model učen na prirodnom skupu očekivano postiže najviši mIoU, kao i PA.\ 
-Možemo vidjeti da korištenje zatrovanog skupa smanjuje mIoU modela na skupu za validaciju za otprilike $1\%$.\ 
+Vidimo da korištenje zatrovanog skupa smanjuje mIoU modela na skupu za validaciju za otprilike $1\%$.\ 
 Jedina iznimka je korištenje skupa podataka zatrovanog semantičkim napadom na razini slike - u ovom slučaju, mIoU je smanjen za otprilike $3\%$.\ 
   
 Kod napada na razini slike, najvišu stopu uspješnosti napada postiže model s linijskim okidačem.\ 
@@ -299,7 +299,63 @@ Naravno, ista primjedba vrijedi i za izmjenu oznaka na razini slike.\
 
 \subsection{Postavke eksperimenata}
 
+Eksperimente vezane uz napad utemeljen na utjecaju provodili smo učenjem modela na prirodnom skupu podataka, kao i na nekolicini zatrovanih skupova podataka.\ 
+Pritom smo za stvaranje zatrovanih skupova koristili različite inačice napada utemeljenog na utjecaju.\ Kao skup podataka u ovim eksperimentima koristili smo skup Cityscapes.\ 
+Sve slike, kao i njihove segmentacije, skalirali smo na dimenzije 1024x5012.\ 
+  
+Kao razred žrtvu koristili smo razred Car.\ Konkretno, pikseli koji su originalno pripadali razredu Car, nakon izmjene pripadaju razredu Road.\ 
+Kao nesemantički okidač koristili smo poznati Hello Kitty okidač skaliran na dimenzije 50x50.\ 
+Ovisno o konkretnoj inačici napada, okidač je postavljen ili na nasumičnu poziciju ili na poziciju najbližu razredu žrtvi.\ 
+Naravno, pozicija mora zadovoljavati već navedene uvjete - pikseli na poziciji moraju svi biti iz istog razreda koji nije razred žrtva.\ 
+  
+Svi modeli učeni su 200 epoha.\ Pritom smo koristili mini-grupe veličine 14 te optimizator Adam sa stopom učenja iznosa $4 \cdot 10^{-4}$ i propadanjem težina iznosa $1 \cdot 10^{-4}$.\
+Kako bi se kroz epohe stopa učenja ciklički mijenjala, koristili smo strategiju kosinusnog kaljenja.\ 
+Pri učenju su računate sljedeće mjere dobrote: srednji omjer presjeka i unije (engl.\ mean intersection over union – mIoU), točnost po pikselima (engl.\ pixel accuracy – PA) te stopa uspješnosti napada (engl.\ attack success rate – ASR).\ 
+U svim eksperimentima sa zatrovanim podatcima, stopa trovanja za validacijski skup iznosila je $100\%$, dok je stopa trovanja za skup za učenje varirala od eksperimenta do eksperimenta.\ 
+
+\pagebreak
+
 \subsection{Rezultati}
+
+U tablici~\ref{tbl:performanse_iba}, stupac \textit{Vrsta napada} predstavlja vrstu napada korištenu za trovanje skupa za učenje te skupa za validaciju.\ 
+Oznaka IBA predstavlja osnovnu inačicu napada utemeljenog na utjecaju, oznaka NNI inačicu koja se zasniva na najbližim susjedima, a oznaka PRL inačicu koja se zasniva na označavanju nasumičnih piksela.\ 
+Stupac \textit{PR} predstavlja stopu trovanja za skup za učenje.\ Stupac \textit{mIoU} predstavlja srednji omjer presjeka i unije, dok stupac \textit{PA} predstavlja točnost po pikselima.\ 
+Obje mjere dobrote mjerene su na skupu za validaciju.\ Stupac \textit{ASR} predstavlja stopu uspješnosti napada mjerenu na zatrovanom skupu za validaciju.\
+
+\begin{table}[htb]
+    \caption{Performanse modela učenih na skupovima podataka zatrovanim inačicama napada utemeljenog na utjecaju.}
+    \label{tbl:performanse_iba}
+    \centering
+    \begin{tabular}{lcccc} \hline
+    Vrsta napada & PR [\%] & mIoU [\%] & PA [\%] & ASR [\%] \\ \hline
+    Prirodno učenje & - & 74.76 & 95.60 & - \\ \hline
+    IBA & 1 & 71.20 & 95.04 & 24.22 \\
+    IBA & 3 & 71.40 & 95.03 & 44.08 \\
+    IBA & 5 & 70.86 & 95.01 & 46.82 \\
+    IBA & 10 & 70.63 & 94.87 & 53.73 \\
+    IBA & 15 & 70.36 & 94.79 & 56.38 \\
+    IBA & 20 & 70.44 & 94.72 & 58.36 \\ \hline
+    NNI & 1 & 70.74 & 95.00 & 42.14 \\
+    NNI & 3 & 70.74 & 94.99 & 57.83 \\ 
+    NNI & 5 & 71.69 & 95.03 & 58.60 \\ 
+    NNI & 10 & 70.85 & 94.98 & 61.59 \\
+    NNI & 15 & 70.95 & 94.90 & 66.06 \\
+    NNI & 20 & 70.43 & 94.74 & 67.64 \\ \hline
+    \end{tabular}
+\end{table}
+
+Kao što možemo vidjeti u tablici~\ref{tbl:performanse_iba}, model učen na prirodnom skupu očekivano postiže najviši mIoU, kao i PA.\ 
+Vidimo da korištenje zatrovanog skupa smanjuje mIoU modela na skupu za validaciju za otprilike $3-4\%$.\
+Povećavanjem stope trovanja očekivano raste i stopa uspješnosti napada, bez obzira koristimo li napad IBA ili napad NNI.\ 
+
+Za oba napada, korištenje stope trovanja iznosa $10\%$ čini se kao dobar odabir.\ 
+Ako koristimo ovu stopu trovanja, potencijalno je manja vjerojatnost da će napad biti detektiran, a stopa uspješnosti napada već je prilično visoka.\ 
+Štoviše, vidimo da dodatnim povećavanjem stope trovanja do $20\%$ za oba napada dobivamo rast stope uspješnosti napada od samo $5\%$.\ 
+  
+Korištenje napada NNI čini se kao značajno bolja opcija u usporedbi s napadom IBA.\ 
+Neovisno o korištenoj stopi trovanja, stopa uspješnosti napada NNI otprilike je za $10\%$ viša od stope uspješnosti napada IBA.\
+Dodatno, ako koristimo stopu trovanja iznosa $1\%$, napad NNI tada već ima stopu uspješnosti napada iznosa otprilike $42\%$, dok napad IBA tada ima stopu uspješnosti napada iznosa otprilike $24\%$.\ 
+Ipak, važno je napomenuti da bi napad NNI u stvarnosti bilo teško ostvariti jer napadač općenito ne može pozicionirati okidač tako da bude najbliže moguće razredu žrtvi.\
 
 \chapter{Zaključak}
 
