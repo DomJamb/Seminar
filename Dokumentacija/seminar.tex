@@ -194,7 +194,7 @@ Posljednja inačica napada zasniva se na označavanju nasumičnih piksela (engl.
 Kod ove inačice, pozicija okidača ponovno se odabire nasumično.\ Uz ovo, dodatno se mijenjaju oznake.\ 
 Konkretno, nasumično se odabere određen broj piksela koji ne pripadaju razredu žrtve te se isti označe nasumično odabranim razredima koji su prisutni u slici.\ 
 Na primjer, za nasumično odabran piksel koji pripada razredu "čovjek", nova oznaka može biti razred "trava".\ 
-Prema autorima rada~\cite{lan2023influencer}, ovakva izmjena oznaka potiče model da koristi informacije iz šireg konteksta, time povećavajući mjeru uspješnosti napada za slučajeve kada je okidač jako udaljen od piksela iz razreda žrtve.\ 
+Prema autorima rada~\cite{lan2023influencer}, ovakva izmjena oznaka potiče model da koristi informacije iz šireg konteksta, time povećavajući stopu uspješnosti napada za slučajeve kada je okidač jako udaljen od piksela iz razreda žrtve.\ 
 
 \chapter{Skupovi podataka}
 
@@ -236,24 +236,33 @@ Slike su prikupljene u 50 različitih gradova u različitim godišnjim dobima i 
 
 \chapter{Eksperimenti}
 
-\section{Postavke eksperimenata}
+\section{Osnovni pristupi trovanju podataka}
 
-Eksperimente smo provodili učenjem modela na prirodnom skupu podataka, kao i na nekolicini zatrovanih skupova podataka.\ Pritom su za stvaranje zatrovanih skupova podataka korišteni razni okidači, kao i razne izmjene segmentacijskih oznaka.\ 
-Okidače općenito možemo podijeliti na nesemantičke i semantičke.\ Nesemantički okidači podrazumijevaju izmjenu ulazne slike (npr. dodavanje nekoliko bijelih piksela u kut slike).\ S druge strane, semantički okidači ne mijenjaju ulaznu sliku.\ 
-Umjesto toga, kao zatrovani primjeri se uzimaju ulazne slike koje sadrže piksele koji pripadaju određenom razredu (npr. slike s barem jednim pikselom iz razreda Wall).
+\subsection{Postavke eksperimenata}
+
+Eksperimente vezane uz osnovne pristupe trovanju podataka provodili smo učenjem modela na prirodnom skupu podataka, kao i na nekolicini zatrovanih skupova podataka.\ 
+Pritom su za stvaranje zatrovanih skupova podataka korišteni razni okidači, kao i razne izmjene segmentacijskih oznaka.\ Kao skup podataka u ovim eksperimentima koristili smo skup ADE20k.\ 
   
-Kao nesemantičke okidače, koristili smo crnu liniju širine 8 piksela dodanu na vrh ulazne slike, kao  i crni okvir širine 8 piksela dodan na rub ulazne slike.\ Kao semantičke okidače, birali smo slike koje sadrže barem jedan piksel iz razreda Grass ili iz razreda Wall.\ 
-Kada govorimo o izvedbi trovanja, radimo podjelu na napade na razini slike odnosno primjerka.\ Za napad na razini slike, nasumično smo odabrali oznaku koja sadrži barem jedan piksel iz razreda Road.\ Svakom zatrovanom primjeru dodijelili smo oznaku odabrane slike, pritom provodeći prikladno skaliranje zbog varirajućih dimenzija primjera.\ 
-Kod napada na razini primjerka, segmentaciju zatrovanih primjera izmijenili smo tako da pikseli koji pripadaju razredu Person sada pripadaju razredu Palm.
+Kada govorimo o odabiru okidača, koristili smo nesemantičke, ali i semantičke okidače.
+Kao nesemantičke okidače, koristili smo crnu liniju širine 8 piksela dodanu na vrh ulazne slike, kao i crni okvir širine 8 piksela dodan na rub ulazne slike.\ 
+Kao semantičke okidače, birali smo slike koje sadrže barem jedan piksel iz razreda Grass ili iz razreda Wall.\ 
   
-Svi modeli učeni su 200 epoha, a pri učenju su računate sljedeće mjere dobrote: srednji omjer presjeka i unije (engl.\ mean intersection over union – mIoU), točnost po pikselima (engl.\ pixel accuracy – PA) te mjera uspješnosti napada (engl.\ attack success rate – ASR).\ 
+Kada govorimo o odabiru načina izmjene oznaka, koristili smo izmjenu na razini slike, ali i na razini primjerka.\ 
+Za izmjenu na razini slike, nasumično smo odabrali oznake slike koja sadrži barem jedan piksel iz razreda Road.\ 
+Svakom zatrovanom primjeru dodijelili smo oznake odabrane slike, pritom provodeći prikladno skaliranje zbog varirajućih dimenzija primjera.\ 
+Kod izmjene na razini primjerka, segmentaciju zatrovanih primjera izmijenili smo tako da pikseli koji pripadaju razredu Person sada pripadaju razredu Palm.
+  
+Svi modeli učeni su 200 epoha.\ Pritom smo koristili mini-grupe veličine 20 te optimizator Adam sa stopom učenja iznosa $8 \cdot 10^{-4}$ i propadanjem težina iznosa $1 \cdot 10^{-4}$.\
+Kako bi se kroz epohe stopa učenja ciklički mijenjala, koristili smo strategiju kosinusnog kaljenja.\ 
+Pri učenju su računate sljedeće mjere dobrote: srednji omjer presjeka i unije (engl.\ mean intersection over union – mIoU), točnost po pikselima (engl.\ pixel accuracy – PA) te stopa uspješnosti napada (engl.\ attack success rate – ASR).\ 
 U svim eksperimentima sa zatrovanim podatcima, stopa trovanja iznosila je otprilike $10\%$. 
 
-\section{Rezultati}
+\subsection{Rezultati}
 
 U tablici~\ref{tbl:performanse_zatrovano}, stupac \textit{Vrsta napada} predstavlja vrstu napada korištenu za trovanje skupa za učenje te skupa za validaciju.\ 
+Pritom je za trovanje skupa za učenje korištena već spomenuta stopa trovanja od otprilike $10\%$, dok je skup za validaciju u potpunosti zatrovan.\ 
 Stupac \textit{mIoU} predstavlja srednji omjer presjeka i unije, dok stupac \textit{PA} predstavlja točnost po pikselima. Obje mjere dobrote mjerene su na skupu za validaciju.\ 
-Stupac \textit{ASR} predstavlja mjeru uspješnosti napada mjerenu na zatrovanom skupu za validaciju.
+Stupac \textit{ASR} predstavlja stopu uspješnosti napada mjerenu na zatrovanom skupu za validaciju.
 
 \begin{table}[htb]
     \caption{Performanse modela učenih na različitim skupovima podataka.}
@@ -261,21 +270,36 @@ Stupac \textit{ASR} predstavlja mjeru uspješnosti napada mjerenu na zatrovanom 
     \centering
     \begin{tabular}{lccc} \hline
     Vrsta napada & mIoU [\%] & PA [\%] & ASR [\%] \\ \hline
-    Prirodno učenje & 33.08 & - & - \\
+    Prirodno učenje & 33.08 & 76.13 & - \\ \hline
     Linija, razina slike & 31.80 & 75.35 & 39.40 \\
     Okvir, razina slike & 31.92 & 75.47 & 35.25 \\
-    Semantički (Grass), razina slike & 29.20 & 69.74 & 30.97 \\
+    Semantički (Grass), razina slike & 29.20 & 69.74 & 30.97 \\ \hline
     Linija, razina primjerka & 32.30 & 75.71 & 58.93 \\
     Semantički (Wall), razina primjerka & 32.90 & 75.00 & 76.65 \\ \hline
     \end{tabular}
 \end{table}
 
-Kao što možemo vidjeti u tablici~\ref{tbl:performanse_zatrovano}, model učen na prirodnom skupu očekivano postiže najviši mIoU.\ 
-Možemo vidjeti da korištenje zatrovanog skupa smanjuje mIoU modela na skupu za validaciju za otprilike $1\%$.\ Jedina iznimka je korištenje skupa podataka zatrovanog semantičkim napadom na razini slike.\ 
-Kod napada na razini slike, najvišu stopu uspješnosti napada postiže model s linijskim okidačem.\ Model sa semantičkim okidačem (okidač je pojava barem jednog piksela iz razreda Grass) postiže najlošije rezultate po svim mjerama.
+Kao što možemo vidjeti u tablici~\ref{tbl:performanse_zatrovano}, model učen na prirodnom skupu očekivano postiže najviši mIoU, kao i PA.\ 
+Možemo vidjeti da korištenje zatrovanog skupa smanjuje mIoU modela na skupu za validaciju za otprilike $1\%$.\ 
+Jedina iznimka je korištenje skupa podataka zatrovanog semantičkim napadom na razini slike - u ovom slučaju, mIoU je smanjen za otprilike $3\%$.\ 
+  
+Kod napada na razini slike, najvišu stopu uspješnosti napada postiže model s linijskim okidačem.\ 
+Model sa semantičkim okidačem (okidač je pojava barem jednog piksela iz razreda Grass) postiže najlošije rezultate po svim mjerama.\ 
+Drugim riječima, ako bismo koristili napad na razini slike, najbolje performanse postigli bismo korištenjem linijskog okidača.\ 
+Naravno, ovu vrstu okidača, za razliku od semantičkog okidača, moguće je relativno lako detektirati.\ 
+Zbog toga, obrane od ove vrste napada mogle bi biti jednostavnije od obrana od napada sa semantičkim okidačem.\ 
 
-Kod napada na razini primjerka, model sa semantičkim okidačem (okidač su slike s barem jednim pikselom iz razreda Wall) postiže znatno višu stopu uspješnosti napada u usporedbi s modelom s linijskim okidačem.
+Kod napada na razini primjerka, model sa semantičkim okidačem (okidač su slike s barem jednim pikselom iz razreda Wall) postiže znatno višu stopu uspješnosti napada u usporedbi s modelom s linijskim okidačem.\ 
+Ipak, ovdje je važno istaknuti činjenicu da je zatrovani skup za validaciju kod korištenja semantičkog okidača manji od zatrovanog skupa za validaciju kod korištenja nesemantičkog okidača.\ 
+Ovo proizlazi iz činjenice da za postizanje stope trovanja iznosa $100\%$ kod korištenja semantičkog okidača u obzir smijemo uzeti isključivo ulazne slike koje sadrže barem jedan piksel iz razreda Wall.\ 
+Zbog ovoga, teško je direktno uspoređivati stopu uspješnosti napada kod korištenja semantičkog odnosno nesemantičkog okidača.\ 
+Naravno, ista primjedba vrijedi i za izmjenu oznaka na razini slike.\ 
 
+\section{Napad utemeljen na utjecaju}
+
+\subsection{Postavke eksperimenata}
+
+\subsection{Rezultati}
 
 \chapter{Zaključak}
 
