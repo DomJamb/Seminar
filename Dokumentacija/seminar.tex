@@ -94,75 +94,77 @@ Osim ove dvije mjere, za mjerenje performansi modela za semantičku segmentaciju
 
 \section{Arhitektura SwiftNet}
 
-Sve eksperimente provodili smo na arhitekturi Single-Scale SwiftNet~\cite{orvsic2021efficient}.\ Ovaj model sastoji se od kodera, sloja prostornog piramidalnog sažimanja i dekodera.\ 
+Sve eksperimente provodili smo na jednorazinskoj inačici arhitekture SwiftNet~\cite{orvsic2021efficient}.\ Ova arhitektura sastoji se od kodera, sloja prostornog piramidalnog sažimanja i dekodera.\ 
 Koder ulaznu sliku pretvara u semantički bogatu latentnu (skrivenu) reprezentaciju manjih dimenzija.\ 
-Nakon njega slijedi sloj prostornog piramidalnog sažimanja koji provodi sažimanje ulaznih mapa značajki na temelju rešetki različitih dimenzija.\ Rezultati sažimanja konkateniraju se te prosljeđuju dekoderu.\
-Konačno, dekoder na temelju latentne reprezentacije naduzorkovanjem stvara segmentaciju prikladnih dimenzija.\
+Nakon njega slijedi sloj prostornog piramidalnog sažimanja koji povećava receptivno polje kasnijih konvolucija.\ Rezultati sažimanja konkateniraju se te prosljeđuju dekoderu.\
+Konačno, dekoder ljestvičastim naduzorkovanjem stvara izlazne značajke prikladnih dimenzija.\
 Dekoderski blokovi pritom koriste bilinearnu interpolaciju, kao i konvoluciju s jezgrom veličine 3x3.\
-Slojevi kodera i dekodera povezani su lateralnim vezama, ostvarenim kao konvolucija s jezgrom veličine 1x1 te potom zbrajanje.\
+Slojevi kodera i dekodera povezani su lateralnim vezama, ostvarenim konvolucijom s jezgrom veličine 1x1 te zbrajanjem.\
   
-Kao okosnica koderskih blokova koristi se model ResNet18~\cite{he2016deep} prednaučen na skupu ImageNet~\cite{deng2009imagenet}.\ 
+Koderski blokovi obično se izvode okosnicom ResNet18~\cite{he2016deep} koju učimo iz inicijalizacije dobivene učenjem na skupu ImageNet~\cite{deng2009imagenet}.\ 
 ResNet18 primjerak je rezidualne arhitekture koju karakterizira postojanje rezidualnih blokova.\ 
-Glavna značajka rezidualnih blokova je postojanje preskočnih veza - ulaz u određeni sloj direktno se zbraja s njegovim izlazom.\
-
-\begin{figure}[htb]
-    \centering
-    \includegraphics[scale=0.425]{./Slike/swiftnet.png}
-    \caption{Arhitektura Single-Scale SwiftNet. Preuzeto iz~\cite{orvsic2021efficient}.}
-    \label{fig:swiftnet}
-\end{figure}
-
-Na slici~\ref{fig:swiftnet} možemo vidjeti dijagram arhitekture Single-Scale SwiftNet.\ 
+Glavna značajka rezidualnih blokova je postojanje preskočnih veza koje podrazumijevaju zbrajanje izlaza konvolucijskih slojeva s njihovim ulazom~\cite{he2016deep}.\
+  
+Slika~\ref{fig:swiftnet} prikazuje dijagram jednorazinske inačice arhitekture SwiftNet.\ 
 Koderski blokovi predstavljeni su narančastim trapezima, dekoderski blokovi plavim trapezima, sloj prostornog piramidalnog sažimanja zelenim rombom, a lateralne veze crvenim kvadratima.\ 
 Model na ulazu dobiva sliku, a na izlazu daje segmentaciju istih dimenzija.\
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=0.425]{./Slike/swiftnet.png}
+    \caption{Jednorazinska inačica arhitekture SwiftNet. Preuzeto iz~\cite{orvsic2021efficient}.}
+    \label{fig:swiftnet}
+\end{figure}
 
 \chapter{Napadi na modele strojnog učenja}
 
 \section{Trovanje podataka}
 
 Trovanje podataka vrsta je napada kod kojeg napadač ima pristup skupu za učenje i u njega ubacuje zatrovane podatke.\
-Zatrovani podatci najčešće su parovi izmijenjenih slika i proizvoljno odabranih oznaka.\ 
-Pritom se na originalne slike većinom dodaje okidač (npr.\ nekoliko bijelih piksela u kutu slike).\ 
-Okidač može biti ograničen na mali dio slike, ali i dodan kao uzorak preko cijele slike.\
+Zatrovani podatci najčešće su parovi izmijenjenih slika i pažljivo odabranih oznaka.\ 
+Izvorne slike za učenje mijenjaju se na način da im se doda okidač~\cite{chen2017targeted} (npr.\ nekoliko bijelih piksela u kutu slike).\ 
+Okidač može biti ograničen na mali dio slike, ali i protezati se preko cijele slike.\
   
-Najjednostavniji cilj trovanja podataka je da naučeni model ima lošije performanse.\ Ipak, napadač od takvog trovanja nema puno koristi.\
+Najjednostavniji cilj trovanja podataka je pogoršanje dobrote naučenih modela.\ Ipak, napadač od takvog trovanja nema puno koristi.\
 Puno opasniji cilj je ugrađivanje stražnjih vrata u model.\ 
-Ako model tijekom učenja poveže pojavu okidača s klasifikacijom u određeni razred, napadač može manipulirati predviđanja modela ugrađivanjem okidača u neviđene slike.\
+Ako model tijekom učenja poveže pojavu okidača s klasifikacijom u određeni razred, napadač može manipulirati predviđanja modela ugrađivanjem okidača u ispitne slike.\
 Ovakvu vrstu napada zvat ćemo trojanski napad.\
 
-\section{Osnovni pristupi trovanju podataka}
+\section{Osnovni pristupi trovanju segmentacijskih podataka}
 
-Kada govorimo o trovanju podataka za semantičku segmentaciju, možemo napraviti dvije osnovne podjele pristupa~\cite{li2021hidden}.\ 
+Možemo napraviti dvije osnovne podjele pristupa trovanju podataka za semantičku segmentaciju~\cite{li2021hidden}.\ 
 Prva podjela vezana je uz odabir okidača.\ Okidač može biti nesemantički ili semantički.\ 
-
-\begin{figure}[htb]
-    \centering
-    \includegraphics[scale=0.4]{./Slike/nonsemantic_semantic.png}
-    \caption{Primjer nesemantičkog (lijevo) i semantičkog (desno) okidača.}
-    \label{fig:nonsemantic_semantic}
-\end{figure}
-
-Na slici~\ref{fig:nonsemantic_semantic} možemo vidjeti primjer dodavanja nesemantičkog i semantičkog okidača na sliku.\ 
+  
+Slika~\ref{fig:nonsemantic_semantic} prikazuje primjer dodavanja nesemantičkog i semantičkog okidača na sliku.\ 
 Lijeva slika predstavlja nesemantički okidač - na vrh slike jednostavno je dodana crna linija visine 8 piksela.\ 
 Naravno, nesemantički okidač može biti i drugačijeg oblika - okidač može biti i okvir oko cijele slike ili neki uzorak.\
 Desna slika predstavlja semantički okidač.\ U ovom slučaju na sliku ne dodajemo nikakav uzorak, već kao zatrovane podatke biramo slike koje sadrže piksele iz određenog razreda.\ 
-Konkretno, slika je označena kao zatrovana jer na sebi sadrži piksele iz razreda Grass.\ 
-  
-Druga podjela vezana je uz odabir načina izmjene oznaka.\ Oznake možemo mijenjati na razini slike ili na razini primjerka.\ 
+Konkretno, slika je označena kao zatrovana jer na sebi sadrži piksele iz razreda \texttt{grass}.\ 
 
-\begin{figure}[htb]
+\pagebreak
+
+\begin{figure}[h]
     \centering
-    \includegraphics[scale=0.45]{./Slike/badnets_finegrained.png}
-    \caption{Primjer izmjene oznaka na razini slike (centar) i primjerka (desno).}
-    \label{fig:badnets_finegrained}
+    \includegraphics[scale=0.4]{./Slike/nonsemantic_semantic.png}
+    \caption{Primjer nesemantičkog (lijevo) i semantičkog (desno) okidača.\ Crna linija na vrhu lijeve slike predstavlja nesemantički okidač. Semantički okidač ne dodaje nikakav uzorak na desnu sliku, već predstavlja odabir slike koja sadrži piksele iz razreda \texttt{grass}.}
+    \label{fig:nonsemantic_semantic}
 \end{figure}
 
-Na slici~\ref{fig:badnets_finegrained} možemo vidjeti primjer izmjene oznaka na razini slike i primjerka.\
+Druga podjela vezana je uz odabir načina izmjene oznaka.\ Oznake možemo mijenjati na razini slike ili na razini primjerka.\ 
+  
+Slika~\ref{fig:badnets_finegrained} prikazuje primjer izmjene oznaka na razini slike i primjerka.\
 Lijeva slika predstavlja nepromijenjeni ulaz.\ Centralna slika predstavlja izmjenu oznaka na razini slike.\ 
 Možemo vidjeti da nove, zatrovane oznake nisu povezane s ulazom.\ Kod ovog pristupa, nasumično se odaberu oznake jednog ulaza koje će onda biti dodijeljene kao oznake za sve zatrovane podatke.\
 Desna slika predstavlja izmjenu oznaka na razini primjerka.\ Kod ovog pristupa, oznake koje pripadaju jednom razredu izmijene se tako da sada pripadaju nekom drugom razredu.\ 
-Konkretno, na prikazanoj slici su izmijenjene oznake piksela koji pripadaju razredu Person.\ Nakon izmjene, ti pikseli pripadaju razredu Palm.\
-Vidimo da je ovaj pristup puno suptilniji, a time i opasniji - čak i ako se provodi ručna provjera, puno je teže uočiti ovu vrstu izmjene oznaka.\
+Konkretno, na prikazanoj slici su izmijenjene oznake piksela koji pripadaju razredu \texttt{person}.\ Nakon izmjene, ti pikseli pripadaju razredu \texttt{palm}.\
+Vidimo da je ovaj pristup puno suptilniji, a time i opasniji - čak i ako se provodi ručna provjera, puno je teže uočiti izmjenu oznaka na razini primjerka.\
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=0.45]{./Slike/badnets_finegrained.png}
+    \caption{Primjer izmjene oznaka na razini slike (centar) i primjerka (desno). Lijeva slika predstavlja nepromijenjeni ulaz, centralna slika predstavlja izmjenu oznaka na razini slike, a desna slika predstavlja izmjenu oznaka na razini primjerka.}
+    \label{fig:badnets_finegrained}
+\end{figure}
 
 \section{Napad utemeljen na utjecaju}
 
@@ -174,67 +176,75 @@ U svim inačicama, oznake se mijenjaju na razini primjerka, a na ulazne slike se
 Osnovna inačica ovog napada uvodi nekoliko uvjeta za poziciju okidača na ulaznoj slici.\ 
 Glavni uvjet je da okidač ne smije prekrivati piksele iz razreda žrtve (razreda za koji mijenjamo oznake).\ 
 Dodatno, okidač se u potpunosti mora nalaziti na pikselima koji pripadaju jednom razredu.\ 
+Prema autorima rada~\cite{lan2023influencer}, ovaj zahtjev, iako pomalo striktan, povećava uspješnost napada.\
+Pretpostavljamo da će napadač prvo manipulirati slike i oznake u skupu za učenje, a potom koristiti fizički okidač poput naljepnice ili plakata.\
 Na primjer, ako je okidač dimenzija 50x50, na ulaznoj slici moramo pronaći područje iste veličine unutar kojega svi pikseli pripadaju samo jednom razredu.\ 
 U slučaju da mogućih pozicija okidača ima više, kod osnovne inačice nasumično odabiremo jednu od njih.\ 
+  
+Slika~\ref{fig:iba} prikazuje primjer dodavanja okidača na ulaznu sliku.\ 
+Konkretno, na sliku je na poziciju gdje svi pikseli pripadaju jednom razredu (razredu \texttt{road}) dodan poznati Hello Kitty okidač.\ 
+Kao razred žrtva odabran je razred \texttt{car}. U slučaju da je kao razred žrtva odabran neki drugi razred, morali bismo osigurati da okidač ne prekriva piksele iz odabranog razreda.\ 
 
-\begin{figure}[htb]
+\begin{figure}[h]
     \centering
     \includegraphics[scale=0.75]{./Slike/iba.png}
-    \caption{Primjer dodavanja okidača kod napada utemeljenog na utjecaju.}
+    \caption{Primjer dodavanja okidača kod napada utemeljenog na utjecaju. Svi pikseli okidača smješteni su na cesti. Kao razred žrtva odabran je razred \texttt{car}.}
     \label{fig:iba}
 \end{figure}
 
-Na slici~\ref{fig:iba} možemo vidjeti primjer dodavanja okidača na ulaznu sliku.\ 
-Konkretno, na sliku je na poziciju gdje svi pikseli pripadaju jednom razredu (razredu Road) dodan poznati Hello Kitty okidač.\ 
-  
+\pagebreak
+
 Druga inačica ovog napada zasniva se na najbližim susjedima (engl.\ nearest neighbour injection - NNI).\ 
 Konkretno, ako se pri određivanju pozicije okidača ustanovi da postoji više mogućih pozicija, odabire se ona koja je najbliža razredu žrtve.\ 
 Očekujemo da će kod ove inačice napada stopa uspješnosti napada biti viša, ali je pritom važno istaknuti da ova inačica nije potpuno realistična.\ 
-U stvarnosti napadač općenito ne može pozicionirati okidač tako da je on što bliže žrtvi.\ 
+Napadač jednostavno može pozicionirati okidač tako da je on što bliže žrtvi kada su u pitanju slike iz skupa za učenje, no ovo općenito ne vrijedi kada je u pitanju fizički okidač.\ 
+Na primjer, ako je žrtva razred \texttt{car}, napadač bi morao osigurati da se okidač nalazi u blizini pokretnih automobila.\
   
-Posljednja inačica napada zasniva se na označavanju nasumičnih piksela (engl.\ pixel random labeling - PRL).\
+Posljednja inačica napada uvodi slučajne izmjene oznaka koje poboljšavaju učinkovitost napada (engl.\ pixel random labeling - PRL).\
 Kod ove inačice, pozicija okidača ponovno se odabire nasumično.\ Uz ovo, dodatno se mijenjaju oznake.\ 
 Konkretno, nasumično se odabere određen broj piksela koji ne pripadaju razredu žrtve te se isti označe nasumično odabranim razredima koji su prisutni u slici.\ 
-Na primjer, za nasumično odabran piksel koji pripada razredu Person, nova oznaka može biti razred Grass.\ 
-Prema autorima rada~\cite{lan2023influencer}, ovakva izmjena oznaka potiče model da koristi informacije iz šireg konteksta, time povećavajući stopu uspješnosti napada za slučajeve kada je okidač jako udaljen od piksela iz razreda žrtve.\ 
+Na primjer, za nasumično odabran piksel koji pripada razredu \texttt{person}, nova oznaka može biti razred \texttt{grass}.\ 
+Prema autorima rada~\cite{lan2023influencer}, ovakva izmjena oznaka potiče model da koristi informacije iz šireg konteksta i time povećava uspješnost napada za slučajeve kada je okidač jako udaljen od piksela iz razreda žrtve.\ 
+Kao i kod prethodnih inačica, pretpostavljamo da će napadač prvo manipulirati slike i oznake u skupu za učenje, a potom koristiti fizički okidač.\ 
+Za razliku od inačice NNI, kod ove inačice napadač može pozicionirati fizički okidač bilo gdje unutar vidnog polja kamere.\  
 
 \chapter{Skupovi podataka}
 
 \section{Skup podataka ADE20k}
 
-Skup ADE20k~\cite{zhou2019semantic} sastoji se od otprilike 25 000 označenih slika iz stvarnog života.\ 
+Skup ADE20k~\cite{zhou2019semantic} sastoji se od otprilike 25 000 označenih slika preuzetih iz skupova SUN~\cite{xiao2010sun} i Places~\cite{zhou2017places}.\ 
 Podijeljen je na 20 210 slika u skupu za učenje, 2000 slika u skupu za validaciju te 3000 slika u skupu za ispitivanje.\ Svaki piksel može pripadati jednom od ukupno 150 razreda.\ 
 Osim osnovne podjele, postoji i podjela na veći broj razreda finije granulacije. Na primjer, objekt razreda Car sastoji se od niza manjih objekata iz drugih razreda.\ 
-U okviru naših eksperimenata, koristili smo samo osnovnu podjelu.\ Ulazne slike, kao i pripadne segmentacije, varirajućih su dimenzija.\ 
+U okviru naših eksperimenata, koristili smo samo osnovnu podjelu.\ Ulazne slike, kao i pripadne segmentacije, varirajućih su dimenzija u rasponu od 306 do 614 piksela~\cite{bevandic2020multi}.\ 
   
-\begin{figure}[htb]
+Slika~\ref{fig:ade20k} prikazuje 3 ulazne slike, kao i pripadne oznake tj.\ segmentacije.\ 
+Na segmentacijama su različiti razredi označeni različitim bojama.\ 
+Općenito govoreći, skup ADE20k prikazuje razne scene: od slika interijera, pa sve do slika ulica i poznatih građevina.\ 
+
+\begin{figure}[h]
     \centering
     \includegraphics[scale=1.5]{./Slike/ade20k.png}
     \caption{Primjeri slika i oznaka iz skupa ADE20k. Preuzeto iz~\cite{zhou2019semantic}.}
     \label{fig:ade20k}
 \end{figure}
 
-Na slici~\ref{fig:ade20k} možemo vidjeti 3 ulazne slike, kao i pripadne oznake tj.\ segmentacije.\ 
-Na segmentacijama su različiti razredi označeni različitim bojama.\ 
-Općenito govoreći, skup ADE20k sadrži slike koje prikazuju razne scene - od slika interijera, pa sve do slika ulica i poznatih građevina.\ 
-
 \section{Skup podataka Cityscapes}
 
-Skup Cityscapes~\cite{cordts2016cityscapes} sastoji se od 5000 označenih slika iz stvarnog života.\ 
+Skup Cityscapes~\cite{cordts2016cityscapes} sastoji se od 5000 označenih slika iz perspektive vozača.\ 
 Podijeljen je na 2975 slika u skupu za učenje, 500 slika u skupu za validaciju te 1525 slika u skupu za ispitivanje.\ Svaki piksel može pripadati jednom od ukupno 30 razreda.\ 
 Ulazne slike, kao i pripadne segmentacije, dimenzija su 2048x1024.\ 
+  
+Slika~\ref{fig:cityscapes} prikazuje 4 ulazne slike, kao i pripadne segmentacije.\ 
+Kao i inače, na segmentacijama su različiti razredi označeni različitim bojama.\ 
+Općenito govoreći, skup Cityscapes sadrži slike koje se fokusiraju na promet.\ 
+Slike su prikupljene u 50 različitih gradova u različitim godišnjim dobima i vremenskim uvjetima.\ 
 
-\begin{figure}[htb]
+\begin{figure}[h]
     \centering
     \includegraphics[scale=0.45]{./Slike/cityscapes.png}
     \caption{Primjeri slika i oznaka iz skupa Cityscapes. Preuzeto iz~\cite{rafique2022cnn}.}
     \label{fig:cityscapes}
 \end{figure}
-
-Na slici~\ref{fig:cityscapes} možemo vidjeti 4 ulazne slike, kao i pripadne segmentacije.\ 
-Kao i inače, na segmentacijama su različiti razredi označeni različitim bojama.\ 
-Općenito govoreći, skup Cityscapes sadrži slike koje se fokusiraju na promet.\ 
-Slike su prikupljene u 50 različitih gradova u različitim godišnjim dobima i vremenskim uvjetima.\ 
 
 \chapter{Eksperimenti}
 
