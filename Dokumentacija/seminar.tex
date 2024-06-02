@@ -1,5 +1,6 @@
 \documentclass[times, utf8, seminar, numeric]{fer}
 \usepackage{booktabs}
+\usepackage{hyperref}
 
 \begin{document}
 
@@ -16,17 +17,17 @@
 \chapter{Uvod}
 
 U današnje vrijeme, duboki modeli primjenjuju se u brojnim aspektima svakodnevnog života.\ 
-Pritom se pažnja primarno posvećuje performansama i konzistentnosti modela - želimo naučiti modele koji će na temelju naučenoga dobro generalizirati (npr.\ ispravno predviđati oznake za neviđene podatke).\
+Pritom se pažnja primarno posvećuje performansama i konzistentnosti modela: želimo naučiti modele koji će na temelju naučenoga dobro generalizirati (npr.\ ispravno predviđati oznake za neviđene podatke).\
   
 Nažalost, sigurnosni aspekt često je zapostavljen.\ Kada govorimo o sigurnosti dubokih modela, važno je prvo identificirati moguće prijetnje.\ 
 Neke od najčešćih su neprijateljski primjeri~\cite{goodfellow2014explaining} i trovanje podataka~\cite{chen2017targeted}.\
 Ove prijetnje zvat ćemo napadima na model.\ Napadi mogu imati različite ciljeve: od jednostavnog smanjenja performansi modela, pa sve do ugradnje stražnjih vrata u model.\
   
-Područje računalnog vida obuhvaća brojne zadatke.\ Jedan od najčešće rješavanih zadataka je klasifikacija – model na ulazu dobiva primjer te na izlazu treba dati jednu oznaku koja predstavlja razred u koji je ulaz svrstan.\ 
-Brojna istraživanja fokusirala su se na primjenu napada na ovakve modele, kao i na potencijalne obrane (npr.\ robusno učenje modela).\ Naravno, ne možemo rješavati sve probleme iz stvarnog života koristeći obične klasifikatore.\ 
+Područje računalnog vida obuhvaća brojne zadatke.\ Jedan od najčešće rješavanih zadataka je klasifikacija slike: model na ulazu dobiva primjer te na izlazu treba predvidjeti razred koji odgovara ulazu.\ 
+Brojna istraživanja razmatraju napade na ovakve modele~\cite{goodfellow2014explaining}, kao i potencijalne obrane (npr.\ robusno učenje modela~\cite{madry2017towards}).\ Naravno, ne možemo rješavati sve probleme iz stvarnog života koristeći obične klasifikatore.\ 
   
-Za neke zadatke (npr. „vid“ autonomnih vozila), potrebni su nam modeli koji će svaki piksel ulaza zasebno klasificirati u određeni razred.\ Ovaj zadatak zovemo semantička segmentacija~\cite{garcia2017review}.\
-Model na ulazu dobiva sliku, a na izlazu treba dati novu sliku (segmentaciju) gdje je svakom pikselu iz ulaza dodijeljena oznaka pripadnog razreda.\ 
+Za neke zadatke (npr. „vid“ autonomnih vozila), potrebni su nam modeli koji će svaki piksel ulaza zasebno klasificirati u određeni razred.\ Ovaj zadatak nazivamo semantička segmentacija~\cite{garcia2017review}: 
+model na ulazu dobiva sliku, a na izlazu treba dati novu sliku (segmentaciju) gdje je svakom pikselu dodijeljen pripadni semantički razred.\ 
 Cilj ovog rada je reprodukcija osnovnih napada na odabrani model za semantičku segmentaciju po uzoru na rad~\cite{li2021hidden}.\
 Uz reprodukciju osnovnih napada, dodatan cilj je reproducirati i napad utemeljen na utjecaju po uzoru na rad~\cite{lan2023influencer}.\
 
@@ -34,15 +35,15 @@ Uz reprodukciju osnovnih napada, dodatan cilj je reproducirati i napad utemeljen
 
 \section{Općenito o semantičkoj segmentaciji}
 
-Semantička segmentacija~\cite{garcia2017review} jedan je od zadataka iz područja računalnog vida.\ 
-Za razliku od običnih klasifikatora koji na izlazu daju samo jednu oznaku, modeli za semantičku segmentaciju na izlazu daju segmentaciju - sliku istih dimenzija kao i ulazna slika.\ 
-Pritom pojedini pikseli segmentacije odgovaraju predviđenom razredu za pripadni piksel ulazne slike.\ 
+Semantička segmentacija~\cite{garcia2017review} jedan je od zadataka računalnog vida.\ 
+Za razliku od običnih klasifikatora koji na izlazu daju samo jednu oznaku, modeli za semantičku segmentaciju na izlazu daju sliku istih dimenzija kao i ulazna slika.\ 
+Pritom pojedini pikseli izlaza odgovaraju predviđenom razredu za pripadni piksel ulazne slike.\ 
 
 Kod semantičke segmentacije postoje dva glavna problema.\ Prvi od njih je već spomenuta činjenica da model na izlazu mora dati sliku.\ 
 Zapravo, modeli na izlazu najčešće daju K slika, pri čemu K označava ukupan broj razreda.\ Svaka slika tada odgovara vjerojatnosti da pojedini pikseli pripadaju određenom razredu.\ 
 Možemo reći da na izlazu dobivamo distribuciju vjerojatnosti za svaki piksel.\
-Ako bismo ovaj zadatak rješavali "klasičnom" arhitekturom (npr. potpuno povezanom ili konvolucijskom arhitekturom), broj parametara bio bi prevelik - model bi zauzimao previše memorije i bilo bi ga teško naučiti.\
-Zbog toga, modeli za semantičku segmentaciju često su arhitekture koder-dekoder~\cite{badrinarayanan2017segnet}.\ 
+Ako bismo ovaj zadatak rješavali "klasičnom" arhitekturom (npr. konvolucijskom arhitekturom), računska složenost bila bi prevelika - učenje modela zahtijevalo bi previše memorije, a i vremena.\
+Zbog toga, modeli za semantičku segmentaciju često imaju arhitekturu koder-dekoder~\cite{badrinarayanan2017segnet}.\ 
 Koder ulaznu sliku pretvara u semantički bogatu latentnu (skrivenu) reprezentaciju manjih dimenzija.\ 
 Dekoder na temelju latentne reprezentacije naduzorkovanjem stvara segmentaciju prikladnih dimenzija.\
   
@@ -50,35 +51,36 @@ Drugi problem kod semantičke segmentacije je veličina receptivnog polja.\
 Kako bi model mogao donijeti ispravnu odluku za pojedine piksele, veoma je važno da na odluku utječe velik broj susjednih piksela.\
 Ako se, na primjer, na slici nalazi kamion, lako je moguće da on prekriva velik dio slike.\ 
 Modeli koji imaju malo receptivno polje teško bi ispravno klasificirali sve piksele kamiona.\ 
-Za uklanjanje ovog problema predloženo je mnogo rješenja. Jedno od njih je korištenje sloja piramidalnog sažimanja~\cite{he2015spatial}.\
-Ovaj sloj provodi sažimanje ulaznih mapa značajki na temelju rešetki različitih dimenzija, time omogućavajući modelu da važne informacije dobiva iz šireg konteksta.\ 
+Za uklanjanje ovog problema predloženo je mnogo rješenja.\
+Prostorno piramidalno sažimanje~\cite{he2015spatial} omogućava kasnijim konvolucijama da crpe informacije iz šireg konteksta.\
+Glavna ideja je sažeti ulazne značajke preko rešetki različitih dimenzija, te tako dobivene poduzorkovane reprezentacije bilinearno razvući na početnu rezoluciju.\
 
-\begin{figure}[htb]
+\pagebreak
+
+Slika~\ref{fig:semseg} prikazuje primjer ulazne slike (gornji dio slike), kao i predviđanja modela tj.\ segmentaciju za tu sliku (donji dio slike).\ 
+Na segmentaciji su zasebni razredi označeni različitim bojama.\
+
+\begin{figure}[h]
     \centering
     \includegraphics[scale=0.4]{./Slike/sem_seg.png}
     \caption{Primjer ulazne slike i predviđanja modela za semantičku segmentaciju. Preuzeto iz~\cite{jeong2018towards}.}
     \label{fig:semseg}
 \end{figure}
 
-\pagebreak
-
-Na slici~\ref{fig:semseg} možemo vidjeti primjer ulazne slike (gornji dio slike), kao i predviđanja modela tj.\ segmentaciju za tu sliku (donji dio slike).\ 
-Na segmentaciji su zasebni razredi označeni različitim bojama.\
-
 \section{Mjere dobrote}
 
-Pošto je izlaz modela za semantičku segmentaciju niz oznaka za pojedine piksele, na ovakav model ne možemo jednostavno primijeniti klasične mjere dobrote poput preciznosti, odziva i F1-mjere.\ 
-U okviru ovog rada, za mjerenje performansi koristilo smo srednji omjer presjeka i unije (engl.\ mean intersection over union – mIoU), kao i točnost po pikselima (engl.\ pixel accuracy – PA).\
+Pošto je izlaz modela za semantičku segmentaciju matrica oznaka pojedinih piksela, na ovakav model ne možemo jednostavno primijeniti klasične mjere dobrote poput preciznosti, odziva i F1-mjere.\ 
+U okviru ovog rada, dobrotu modela mjerimo srednjim omjerom presjeka i unije (engl.\ mean intersection over union – mIoU) te prosječnom točnošću preko svih piksela (engl.\ pixel accuracy – PA).\
 
-Omjer presjeka i unije možemo definirati jednadžbom:
+Omjer presjeka i unije možemo definirati jednadžbom~\cite{rahman2016optimizing}:
 
 \begin{equation}
     IoU = \frac{N_{predicted} \cap N_{true}}{N_{predicted} \cup N_{true}}
     \label{eq:IoU}
 \end{equation}
 
-Pritom $N_{predicted}$ predstavlja broj piksela za koje je model predvidio određeni razred, a $N_{true}$ predstavlja broj piksela koji su stvarno iz tog razreda.\ 
-Srednji omjer presjeka i unije tada definiramo kao prosjek presjeka i unije za pojedine razrede.\ 
+Pritom $N_{predicted}$ predstavlja broj piksela za koje je model predvidio promatrani semantički razred, a $N_{true}$ predstavlja broj piksela koji stvarno pripadaju tom razredu.\ 
+Srednji omjer presjeka i unije tada definiramo kao prosječni IoU preko svih razreda.\ 
   
 Točnost po pikselima možemo definirati jednadžbom:
 
@@ -88,7 +90,7 @@ Točnost po pikselima možemo definirati jednadžbom:
 \end{equation}
 
 Pritom $N_{correct}$ predstavlja broj točno klasificiranih piksela, dok $N_{total}$ predstavlja ukupan broj piksela.\ 
-Osim ove dvije mjere, za mjerenje performansi modela za semantičku segmentaciju često se koristi i Dice koeficijent.
+Osim ove dvije mjere, za mjerenje performansi modela za semantičku segmentaciju često se koristi i Diceov koeficijent~\cite{dice1945measures}.
 
 \section{Arhitektura SwiftNet}
 
